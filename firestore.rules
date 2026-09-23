@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Función auxiliar para verificar si el usuario tiene rol de administrador
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // Función auxiliar para verificar si el usuario es el dueño del recurso
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // 1. Colección de Usuarios
+    match /users/{userId} {
+      // Los usuarios solo pueden leer su propio perfil; los admins pueden consultar perfiles
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Creación de usuario al registrarse (role 'user' por defecto)
+      allow create: if isOwner(userId) && request.resource.data.role in ['user', 'admin'];
+      
+      // Actualización de su propio perfil (no pueden cambiarse a sí mismos a admin sin ser admin)
+      allow update: if isOwner(userId) && (
+        request.resource.data.role == resource.data.role || isAdmin()
+      );
+      
+      allow delete: if isAdmin();
+
+      // Subcolección de configuraciones del usuario
+      match /settings/profile {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Subcolección de preferencias con VALIDACIÓN ESTRICTA de límites (máx 2 campeonatos, máx 5 casas)
+      match /settings/preferences {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if (isOwner(userId) || isAdmin()) && (
+          request.resource.data.activeCompetitionIds.size() <= 2 &&
+          request.resource.data.activeBookmakerIds.size() <= 5
+        );
+      }
+
+      match /settings/notifications {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Tokens FCM del usuario
+      match /notificationTokens/{tokenId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Parlays personales del usuario
+      match /parlays/{parlayId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // 2. Catálogos Globales (Lectura para usuarios autenticados, Escritura exclusiva de Administrador)
+    match /competitions/{compId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /bookmakers/{bookmakerId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /markets/{marketId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // 3. Datos de Partidos y Cuotas (Lectura pública/autenticada, Escritura exclusiva de Cloud Functions)
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if false; // Solo Admin SDK (Cloud Functions)
+    }
+
+    match /odds/{oddId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 4. Análisis e Historial (Inmutables por usuarios clientes)
+    match /analysis/{analysisId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /analyses/{analysisId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo Admin SDK / Cloud Functions
+    }
+
+    match /history/{historyId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Parlays automáticos generados por el backend
+    match /parlays/{parlayId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false; // Solo Admin SDK / Cloud Functions
+    }
+
+    // Bloqueos y estado del Job Diario
+    match /jobs/{jobId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Telemetría de auditoría
+    match /job_logs/{jobLogId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // 5. Logs y telemetría de administración
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

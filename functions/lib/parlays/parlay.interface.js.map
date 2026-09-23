@@ -1,0 +1,1 @@
+{"version":3,"file":"parlay.interface.js","sourceRoot":"","sources":["../../src/parlays/parlay.interface.ts"],"names":[],"mappings":";AAAA;;;;;;GAMG;;;AAiBH;;GAEG;AACU,QAAA,aAAa,GAAyE;IACjG,uBAAuB,EAAE,EAAE,aAAa,EAAE,CAAC,EAAE,aAAa,EAAE,CAAC,EAAE;IAC/D,YAAY,EAAE,EAAE,aAAa,EAAE,CAAC,EAAE,aAAa,EAAE,CAAC,EAAE;IACpD,eAAe,EAAE,EAAE,aAAa,EAAE,CAAC,EAAE,aAAa,EAAE,CAAC,EAAE;CACxD,CAAC"}
