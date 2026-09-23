@@ -391,12 +391,14 @@ export interface GlobalMarket {
 export type ParlayType =
   | 'HIGH_PROBABILITY_PARLAY'
   | 'VALUE_PARLAY'
-  | 'BALANCED_PARLAY';
+  | 'BALANCED_PARLAY'
+  | 'PACIENCIA_PARLAY';
 
 export type ParlayDisplayCategory =
   | 'FOCO_DEL_DIA'
   | 'ALTA_PROBABILIDAD'
   | 'VALOR'
+  | 'PACIENCIA'
   | 'ALTERNATIVAS';
 
 export type CorrelationRisk = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';

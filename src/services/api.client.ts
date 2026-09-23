@@ -409,6 +409,13 @@ export class ApiClient {
 
   private static getMockUserParlays(userId: string, date?: string): SavedParlay[] {
     const today = date || new Date().toISOString().split('T')[0]!;
+    const now = Date.now();
+
+    // Tiempos dinámicos para que los eventos estén abiertos y con fechas escalonadas
+    const timeTodaySoon = new Date(now + 1000 * 60 * 150).toISOString(); // en 2.5h (Hoy)
+    const timeTodayEvening = new Date(now + 1000 * 60 * 360).toISOString(); // en 6h (Hoy)
+    const timeTomorrow = new Date(now + 1000 * 60 * 60 * 28).toISOString(); // en 28h (Mañana)
+    const timeDayAfter = new Date(now + 1000 * 60 * 60 * 52).toISOString(); // en 52h (Fin de semana)
 
     // Leer preferencias locales si existen para simular personalización por usuario
     let activeComps = ['PL', 'PD'];
@@ -436,11 +443,11 @@ export class ApiClient {
           displayCategory: 'FOCO_DEL_DIA',
           selections: [
             {
-              matchId: 'm-col-1',
+              matchId: 'match-col-1',
               matchDescription: 'Millonarios vs Santa Fe',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodaySoon,
               market: '1X2',
               selection: 'home',
               selectionName: 'Millonarios (Gana)',
@@ -453,11 +460,11 @@ export class ApiClient {
               dataQuality: 'HIGH'
             },
             {
-              matchId: 'm-col-2',
+              matchId: 'match-col-2',
               matchDescription: 'Atlético Nacional vs Junior',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodayEvening,
               market: '1X2',
               selection: 'home',
               selectionName: 'Atlético Nacional (Gana)',
@@ -494,6 +501,90 @@ export class ApiClient {
             generatedAt: new Date().toISOString()
           }
         },
+        // 🐢 PARLEY PACIENCIA (Multi-fecha y Máxima Seguridad)
+        {
+          parlayId: `parlay_${userId}_${today}_paciencia_col`,
+          userId,
+          date: today,
+          type: 'PACIENCIA_PARLAY',
+          displayCategory: 'PACIENCIA',
+          selections: [
+            {
+              matchId: 'match-col-3',
+              matchDescription: 'América de Cali vs Deportivo Cali',
+              competitionId: 'CO_LFP',
+              competitionName: 'Liga BetPlay',
+              utcDate: timeTodaySoon,
+              market: 'double_chance',
+              selection: 'home_draw',
+              selectionName: 'América de Cali o Empate (1X)',
+              probability: 0.76,
+              odds: 1.36,
+              bookmaker: 'BetPlay',
+              bookmakerId: 'betplay',
+              edge: 0.033,
+              expectedValue: 3.36,
+              dataQuality: 'VERY_HIGH'
+            },
+            {
+              matchId: 'match-col-4',
+              matchDescription: 'Independiente Medellín vs Once Caldas',
+              competitionId: 'CO_LFP',
+              competitionName: 'Liga BetPlay',
+              utcDate: timeTomorrow,
+              market: 'double_chance',
+              selection: 'home_draw',
+              selectionName: 'Medellín o Empate (1X)',
+              probability: 0.75,
+              odds: 1.38,
+              bookmaker: 'Wplay',
+              bookmakerId: 'wplay',
+              edge: 0.035,
+              expectedValue: 3.5,
+              dataQuality: 'HIGH'
+            },
+            {
+              matchId: 'match-col-5',
+              matchDescription: 'Deportes Tolima vs Atlético Bucaramanga',
+              competitionId: 'CO_LFP',
+              competitionName: 'Liga BetPlay',
+              utcDate: timeDayAfter,
+              market: 'double_chance',
+              selection: 'home_draw',
+              selectionName: 'Deportes Tolima o Empate (1X)',
+              probability: 0.78,
+              odds: 1.34,
+              bookmaker: 'Rushbet',
+              bookmakerId: 'rushbet',
+              edge: 0.045,
+              expectedValue: 4.52,
+              dataQuality: 'HIGH'
+            }
+          ],
+          combinedOdds: 2.515,
+          estimatedProbability: 0.445,
+          estimatedEV: 11.9,
+          dataQuality: 'VERY_HIGH',
+          modelVersion: 'v1.0.0',
+          generatedAt: new Date().toISOString(),
+          status: 'ACTIVE',
+          correlationRisk: 'NONE',
+          correlationNotes: ['Eventos escalonados en 3 jornadas diferentes con cero correlación negativa.'],
+          rankingScore: 62.4,
+          explanation: {
+            summary: '🐢 Parley Paciencia (Estrategia Multi-Fecha): La combinada más segura de la semana en Colombia.',
+            justification: 'Distribuye los 3 eventos en jornadas distintas (Hoy, Mañana y Fin de semana) con una probabilidad individual superior al 75% por partido.',
+            keyFactors: [
+              'América, Medellín y Tolima acumulan más del 78% de puntos como locales',
+              'Eventos independientes sin solapamiento de horario ni fatiga cruzada'
+            ],
+            riskFactors: [
+              'Requiere esperar la resolución progresiva de cada fecha sin cerrar anticipadamente'
+            ],
+            provider: 'mock',
+            generatedAt: new Date().toISOString()
+          }
+        },
         {
           parlayId: `parlay_${userId}_${today}_alta_prob_col`,
           userId,
@@ -502,11 +593,11 @@ export class ApiClient {
           displayCategory: 'ALTA_PROBABILIDAD',
           selections: [
             {
-              matchId: 'm-col-3',
+              matchId: 'match-col-3',
               matchDescription: 'América de Cali vs Deportivo Cali',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodaySoon,
               market: 'double_chance',
               selection: 'home_draw',
               selectionName: 'América o Empate (1X)',
@@ -519,11 +610,11 @@ export class ApiClient {
               dataQuality: 'HIGH'
             },
             {
-              matchId: 'm-col-1',
+              matchId: 'match-col-1',
               matchDescription: 'Millonarios vs Santa Fe',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodayEvening,
               market: 'under_2.5',
               selection: 'under',
               selectionName: 'Menos de 2.5 Goles',
@@ -563,11 +654,11 @@ export class ApiClient {
           displayCategory: 'VALOR',
           selections: [
             {
-              matchId: 'm-col-1',
+              matchId: 'match-col-1',
               matchDescription: 'Millonarios vs Santa Fe',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodaySoon,
               market: '1X2',
               selection: 'home',
               selectionName: 'Millonarios (Gana)',
@@ -580,11 +671,11 @@ export class ApiClient {
               dataQuality: 'HIGH'
             },
             {
-              matchId: 'm-col-2',
+              matchId: 'match-col-2',
               matchDescription: 'Atlético Nacional vs Junior',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodayEvening,
               market: '1X2',
               selection: 'home',
               selectionName: 'Atlético Nacional (Gana)',
@@ -624,11 +715,11 @@ export class ApiClient {
           displayCategory: 'ALTERNATIVAS',
           selections: [
             {
-              matchId: 'm-col-2',
+              matchId: 'match-col-2',
               matchDescription: 'Atlético Nacional vs Junior',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTodaySoon,
               market: '1X2',
               selection: 'home',
               selectionName: 'Atlético Nacional (Gana)',
@@ -641,26 +732,26 @@ export class ApiClient {
               dataQuality: 'MEDIUM'
             },
             {
-              matchId: 'm-col-3',
-              matchDescription: 'América de Cali vs Deportivo Cali',
+              matchId: 'match-col-4',
+              matchDescription: 'Independiente Medellín vs Once Caldas',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
-              utcDate: new Date().toISOString(),
+              utcDate: timeTomorrow,
               market: 'double_chance',
               selection: 'home_draw',
-              selectionName: 'América o Empate (1X)',
-              probability: 0.72,
-              odds: 1.42,
-              bookmaker: 'BetPlay',
-              bookmakerId: 'betplay',
-              edge: 0.02,
-              expectedValue: 2.24,
+              selectionName: 'Medellín o Empate (1X)',
+              probability: 0.75,
+              odds: 1.38,
+              bookmaker: 'Wplay',
+              bookmakerId: 'wplay',
+              edge: 0.035,
+              expectedValue: 3.5,
               dataQuality: 'HIGH'
             }
           ],
-          combinedOdds: 2.769,
-          estimatedProbability: 0.396,
-          estimatedEV: 9.6,
+          combinedOdds: 2.691,
+          estimatedProbability: 0.412,
+          estimatedEV: 10.8,
           dataQuality: 'MEDIUM',
           modelVersion: 'v1.0.0',
           generatedAt: new Date().toISOString(),
@@ -669,7 +760,7 @@ export class ApiClient {
           correlationNotes: [],
           rankingScore: 39.5,
           explanation: {
-            summary: 'Alternativa Balanceada: Mezcla de favoritismo de Nacional y resguardo en Cali.',
+            summary: 'Alternativa Balanceada: Mezcla de favoritismo de Nacional y resguardo en Medellín.',
             justification: 'Equilibrio de riesgo controlado para diversificación.',
             keyFactors: ['Rendimiento superior en duelos directos'],
             riskFactors: ['Junior con potencial de contragolpe'],
@@ -694,7 +785,7 @@ export class ApiClient {
             matchDescription: 'Arsenal FC vs Chelsea FC',
             competitionId: 'PL',
             competitionName: 'Premier League',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodaySoon,
             market: '1X2',
             selection: 'home',
             selectionName: 'Arsenal FC (Gana)',
@@ -711,7 +802,7 @@ export class ApiClient {
             matchDescription: 'Manchester City vs Liverpool FC',
             competitionId: 'PL',
             competitionName: 'Premier League',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodayEvening,
             market: 'btts',
             selection: 'yes',
             selectionName: 'Ambos Equipos Anotan (Sí)',
@@ -748,6 +839,91 @@ export class ApiClient {
           generatedAt: new Date().toISOString()
         }
       },
+      // 🐢 PARLEY PACIENCIA (Multi-fecha y Máxima Seguridad)
+      {
+        parlayId: `parlay_${userId}_${today}_paciencia_epl`,
+        userId,
+        date: today,
+        type: 'PACIENCIA_PARLAY',
+        displayCategory: 'PACIENCIA',
+        selections: [
+          {
+            matchId: 'match-101',
+            matchDescription: 'Arsenal FC vs Chelsea FC',
+            competitionId: 'PL',
+            competitionName: 'Premier League',
+            utcDate: timeTodaySoon,
+            market: 'double_chance',
+            selection: 'home_draw',
+            selectionName: 'Arsenal o Empate (1X)',
+            probability: 0.80,
+            odds: 1.28,
+            bookmaker: 'Pinnacle',
+            bookmakerId: 'pinnacle',
+            edge: 0.024,
+            expectedValue: 2.4,
+            dataQuality: 'VERY_HIGH'
+          },
+          {
+            matchId: 'match-104',
+            matchDescription: 'Manchester City vs Tottenham Hotspur',
+            competitionId: 'PL',
+            competitionName: 'Premier League',
+            utcDate: timeTomorrow,
+            market: 'over_1.5',
+            selection: 'over',
+            selectionName: 'Más de 1.5 Goles',
+            probability: 0.84,
+            odds: 1.30,
+            bookmaker: 'Bet365',
+            bookmakerId: 'bet365',
+            edge: 0.092,
+            expectedValue: 9.2,
+            dataQuality: 'VERY_HIGH'
+          },
+          {
+            matchId: 'match-105',
+            matchDescription: 'Atlético de Madrid vs Sevilla FC',
+            competitionId: 'PD',
+            competitionName: 'La Liga',
+            utcDate: timeDayAfter,
+            market: 'double_chance',
+            selection: 'home_draw',
+            selectionName: 'Atlético de Madrid o Empate (1X)',
+            probability: 0.78,
+            odds: 1.35,
+            bookmaker: 'Pinnacle',
+            bookmakerId: 'pinnacle',
+            edge: 0.053,
+            expectedValue: 5.3,
+            dataQuality: 'HIGH'
+          }
+        ],
+        combinedOdds: 2.246,
+        estimatedProbability: 0.524,
+        estimatedEV: 17.68,
+        dataQuality: 'VERY_HIGH',
+        modelVersion: 'v1.0.0',
+        generatedAt: new Date().toISOString(),
+        status: 'ACTIVE',
+        correlationRisk: 'NONE',
+        correlationNotes: ['3 partidos distribuidos en 3 jornadas diferentes con cero correlación cruzada.'],
+        rankingScore: 68.5,
+        explanation: {
+          summary: '🐢 Parley Paciencia (Estrategia Multi-Fecha): La combinación más segura del calendario semanal.',
+          justification: 'Estrategia cuantitativa paciente: selecciona los 3 eventos con mayor probabilidad individual calculada (>78%) repartidos entre Hoy, Mañana y Fin de semana.',
+          keyFactors: [
+            'Arsenal acumula 9 partidos sin caer en el Emirates',
+            'Man City y Spurs promedian 3.2 goles en sus duelos directos',
+            'Atlético solo ha concedido 4 goles en casa en toda la temporada'
+          ],
+          riskFactors: [
+            'Requiere paciencia táctica para que concluyan las 3 fechas'
+          ],
+          provider: 'mock',
+          generatedAt: new Date().toISOString()
+        }
+      },
       {
         parlayId: `parlay_${userId}_${today}_alta_prob_epl`,
         userId,
@@ -760,7 +936,7 @@ export class ApiClient {
             matchDescription: 'Arsenal FC vs Chelsea FC',
             competitionId: 'PL',
             competitionName: 'Premier League',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodaySoon,
             market: '1X2',
             selection: 'home',
             selectionName: 'Arsenal FC (Gana)',
@@ -777,7 +953,7 @@ export class ApiClient {
             matchDescription: 'Real Madrid vs FC Barcelona',
             competitionId: 'PD',
             competitionName: 'La Liga',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodayEvening,
             market: 'over_2.5',
             selection: 'over',
             selectionName: 'Más de 2.5 Goles',
@@ -821,7 +997,7 @@ export class ApiClient {
             matchDescription: 'Manchester City vs Liverpool FC',
             competitionId: 'PL',
             competitionName: 'Premier League',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodaySoon,
             market: 'btts',
             selection: 'yes',
             selectionName: 'Ambos Equipos Anotan (Sí)',
@@ -834,11 +1010,11 @@ export class ApiClient {
             dataQuality: 'HIGH'
           },
           {
-            matchId: 'm-pd-2',
+            matchId: 'match-105',
             matchDescription: 'Atlético de Madrid vs Sevilla FC',
             competitionId: 'PD',
             competitionName: 'La Liga',
-            utcDate: new Date().toISOString(),
+            utcDate: timeDayAfter,
             market: '1X2',
             selection: 'home',
             selectionName: 'Atlético de Madrid (Gana)',
@@ -855,7 +1031,7 @@ export class ApiClient {
             matchDescription: 'Real Madrid vs FC Barcelona',
             competitionId: 'PD',
             competitionName: 'La Liga',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodayEvening,
             market: 'over_2.5',
             selection: 'over',
             selectionName: 'Más de 2.5 Goles',
@@ -899,7 +1075,7 @@ export class ApiClient {
             matchDescription: 'Arsenal FC vs Chelsea FC',
             competitionId: 'PL',
             competitionName: 'Premier League',
-            utcDate: new Date().toISOString(),
+            utcDate: timeTodaySoon,
             market: 'over_2.5',
             selection: 'over',
             selectionName: 'Más de 2.5 Goles',
@@ -912,11 +1088,11 @@ export class ApiClient {
             dataQuality: 'HIGH'
           },
           {
-            matchId: 'm-pd-2',
+            matchId: 'match-105',
             matchDescription: 'Atlético de Madrid vs Sevilla FC',
             competitionId: 'PD',
             competitionName: 'La Liga',
-            utcDate: new Date().toISOString(),
+            utcDate: timeDayAfter,
             market: '1X2',
             selection: 'home',
             selectionName: 'Atlético de Madrid (Gana)',

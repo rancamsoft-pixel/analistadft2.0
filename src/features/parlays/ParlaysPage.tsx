@@ -121,6 +121,7 @@ export const ParlaysPage: React.FC = () => {
   };
 
   const focoDelDia = automatedParlays.find(p => p.displayCategory === 'FOCO_DEL_DIA');
+  const parlayPaciencia = automatedParlays.find(p => p.displayCategory === 'PACIENCIA' || p.type === 'PACIENCIA_PARLAY');
   const altaProbabilidad = automatedParlays.find(p => p.displayCategory === 'ALTA_PROBABILIDAD');
   const deValor = automatedParlays.find(p => p.displayCategory === 'VALOR');
   const alternativas = automatedParlays.filter(p => p.displayCategory === 'ALTERNATIVAS');
@@ -279,8 +280,81 @@ export const ParlaysPage: React.FC = () => {
           </Card>
         )}
 
-        {/* 2. PARLEY ALTA PROBABILIDAD Y PARLEY DE VALOR (Grilla de 2 Columnas) */}
+        {/* 2. PARLEY PACIENCIA (Estrategia Multi-Fecha / Máxima Seguridad) */}
+        {parlayPaciencia && (
+          <Card glow="green" style={{ border: '1px solid rgba(16, 185, 129, 0.4)', background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.06), rgba(15, 23, 42, 0.6))' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }}>
+                  <span style={{ fontSize: '1.2rem' }}>🐢</span>
+                  <Badge variant="success">PARLEY PACIENCIA (MULTI-FECHA)</Badge>
+                  <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 600 }}>Máxima Seguridad Cuantitativa</span>
+                </div>
+                <h4 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
+                  {parlayPaciencia.explanation?.summary || 'Combinada Escalonada en Varias Fechas'}
+                </h4>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Cuota Combinada</div>
+                  <div style={{ fontSize: '1.65rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#34d399' }}>
+                    {parlayPaciencia.combinedOdds.toFixed(2)}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Probabilidad Conjunta</div>
+                  <div style={{ fontSize: '1.65rem', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}>
+                    {(parlayPaciencia.estimatedProbability * 100).toFixed(1)}%
+                  </div>
+                </div>
+
+                <Button size="sm" variant="accent" onClick={() => handleLoadIntoSlip(parlayPaciencia.selections)} rightIcon={<ArrowRight size={14} />}>
+                  Cargar al Simulador
+                </Button>
+              </div>
+            </div>
+
+            {/* Timeline / Selecciones escalonadas en varios días */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem', marginTop: '1rem' }}>
+              {parlayPaciencia.selections.map((sel, idx) => {
+                const matchDate = new Date(sel.utcDate);
+                const dayName = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                const matchHour = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                  <div key={idx} style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, textTransform: 'capitalize' }}>
+                        📅 {dayName} • {matchHour}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--accent-green)', fontWeight: 700 }}>
+                        {(sel.probability * 100).toFixed(0)}% acierto
+                      </span>
+                    </div>
+                    <strong style={{ fontSize: '0.92rem', display: 'block', margin: '0.15rem 0' }}>{sel.matchDescription}</strong>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--accent-cyan)' }}>{sel.selectionName} ({sel.market})</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem', marginTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.3rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Cuota: <strong style={{ color: '#ffffff' }}>{sel.odds.toFixed(2)}</strong></span>
+                      <span style={{ color: 'var(--text-muted)' }}>@{sel.bookmaker}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {parlayPaciencia.explanation?.justification && (
+              <div style={{ marginTop: '0.85rem', padding: '0.65rem 0.85rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                💡 <strong>Justificación Cuantitativa:</strong> {parlayPaciencia.explanation.justification}
+              </div>
+            )}
+          </Card>
+        )}
+
+        {/* 3. PARLEY ALTA PROBABILIDAD Y PARLEY DE VALOR (Grilla de 2 Columnas) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+
           {/* Alta Probabilidad */}
           {altaProbabilidad && (
             <Card glow="cyan" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

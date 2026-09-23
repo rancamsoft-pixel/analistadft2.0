@@ -11,12 +11,14 @@ import { DataQuality, SupportedMarket, MarketSelection } from '../prediction/pre
 export type ParlayType =
   | 'HIGH_PROBABILITY_PARLAY'
   | 'VALUE_PARLAY'
-  | 'BALANCED_PARLAY';
+  | 'BALANCED_PARLAY'
+  | 'PACIENCIA_PARLAY';
 
 export type ParlayDisplayCategory =
   | 'FOCO_DEL_DIA'
   | 'ALTA_PROBABILIDAD'
   | 'VALOR'
+  | 'PACIENCIA'
   | 'ALTERNATIVAS';
 
 export type CorrelationRisk = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
@@ -27,7 +29,8 @@ export type CorrelationRisk = 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH';
 export const PARLAY_LIMITS: Record<ParlayType, { minSelections: number; maxSelections: number }> = {
   HIGH_PROBABILITY_PARLAY: { minSelections: 2, maxSelections: 3 },
   VALUE_PARLAY: { minSelections: 2, maxSelections: 4 },
-  BALANCED_PARLAY: { minSelections: 2, maxSelections: 3 }
+  BALANCED_PARLAY: { minSelections: 2, maxSelections: 3 },
+  PACIENCIA_PARLAY: { minSelections: 3, maxSelections: 5 }
 };
 
 /**

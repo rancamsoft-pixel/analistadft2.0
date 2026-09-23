@@ -435,6 +435,172 @@ export const CLIENT_MOCK_MATCHES: SportMatchDetails[] = [
       trend: 'DOWN',
       movementPercentage: -2.5
     }
+  },
+  {
+    id: 'match-104',
+    competition: EUROPA_COMPETITIONS[0]!,
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 28).toISOString(), // Mañana (+28h)
+    status: 'SCHEDULED',
+    homeTeam: {
+      id: 'mancity',
+      name: 'Manchester City FC',
+      shortName: 'Man City',
+      logo: 'https://crests.football-data.org/65.png',
+      form: ['W', 'W', 'W', 'D', 'W']
+    },
+    awayTeam: {
+      id: 'tottenham',
+      name: 'Tottenham Hotspur FC',
+      shortName: 'Tottenham',
+      logo: 'https://crests.football-data.org/73.png',
+      form: ['W', 'L', 'D', 'W', 'L']
+    },
+    score: { home: null, away: null },
+    venue: 'Etihad Stadium (Manchester)',
+    isMock: true,
+    statistics: {
+      possession: { home: 64, away: 36 },
+      shotsOnTarget: { home: 8, away: 3 },
+      totalShots: { home: 18, away: 7 },
+      corners: { home: 8, away: 3 },
+      fouls: { home: 8, away: 11 },
+      xg: { home: 2.45, away: 0.85 }
+    },
+    headToHead: {
+      totalMatches: 10,
+      homeWins: 6,
+      awayWins: 3,
+      draws: 1,
+      recentMatches: [
+        { date: '2024-05-14', homeTeam: 'Tottenham Hotspur', awayTeam: 'Manchester City', score: '0 - 2' }
+      ]
+    },
+    injuries: { home: [], away: [] },
+    news: [
+      { title: 'Haaland en óptimas condiciones para liderar el ataque del City', source: 'BBC Sport', publishedAt: 'Ayer' }
+    ]
+  },
+  {
+    id: 'match-105',
+    competition: EUROPA_COMPETITIONS[1]!,
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 52).toISOString(), // Fin de semana (+52h)
+    status: 'SCHEDULED',
+    homeTeam: {
+      id: 'atletico',
+      name: 'Atlético de Madrid',
+      shortName: 'Atlético',
+      logo: 'https://crests.football-data.org/78.png',
+      form: ['W', 'W', 'D', 'W', 'W']
+    },
+    awayTeam: {
+      id: 'sevilla',
+      name: 'Sevilla FC',
+      shortName: 'Sevilla',
+      logo: 'https://crests.football-data.org/559.png',
+      form: ['L', 'D', 'W', 'L', 'D']
+    },
+    score: { home: null, away: null },
+    venue: 'Cívitas Metropolitano (Madrid)',
+    isMock: true,
+    statistics: {
+      possession: { home: 56, away: 44 },
+      shotsOnTarget: { home: 6, away: 2 },
+      totalShots: { home: 14, away: 6 },
+      corners: { home: 6, away: 3 },
+      fouls: { home: 10, away: 12 },
+      xg: { home: 1.88, away: 0.65 }
+    },
+    headToHead: {
+      totalMatches: 12,
+      homeWins: 7,
+      awayWins: 2,
+      draws: 3,
+      recentMatches: [
+        { date: '2024-01-25', homeTeam: 'Atlético de Madrid', awayTeam: 'Sevilla FC', score: '1 - 0' }
+      ]
+    },
+    injuries: { home: [], away: [] },
+    news: [
+      { title: 'Simeone destaca la solidez defensiva del Atlético en el Metropolitano', source: 'Marca', publishedAt: 'Hoy' }
+    ]
+  },
+  {
+    id: 'match-col-4',
+    competition: COLOMBIA_COMPETITIONS[0]!,
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 27).toISOString(), // Mañana (+27h)
+    status: 'SCHEDULED',
+    homeTeam: {
+      id: 'medellin',
+      name: 'Independiente Medellín',
+      shortName: 'Medellín',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Independiente_Medellin_crest.svg/100px-Independiente_Medellin_crest.svg.png',
+      form: ['W', 'D', 'W', 'W', 'D']
+    },
+    awayTeam: {
+      id: 'once-caldas',
+      name: 'Once Caldas',
+      shortName: 'Once Caldas',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Once_Caldas_logo.svg/100px-Once_Caldas_logo.svg.png',
+      form: ['D', 'W', 'L', 'D', 'W']
+    },
+    score: { home: null, away: null },
+    venue: 'Estadio Atanasio Girardot (Medellín)',
+    isMock: true,
+    statistics: {
+      possession: { home: 54, away: 46 },
+      shotsOnTarget: { home: 5, away: 3 },
+      totalShots: { home: 12, away: 9 },
+      corners: { home: 6, away: 4 },
+      fouls: { home: 12, away: 13 },
+      xg: { home: 1.55, away: 0.92 }
+    },
+    headToHead: {
+      totalMatches: 10,
+      homeWins: 5,
+      awayWins: 2,
+      draws: 3,
+      recentMatches: []
+    },
+    injuries: { home: [], away: [] }
+  },
+  {
+    id: 'match-col-5',
+    competition: COLOMBIA_COMPETITIONS[0]!,
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 51).toISOString(), // Fin de semana (+51h)
+    status: 'SCHEDULED',
+    homeTeam: {
+      id: 'tolima',
+      name: 'Deportes Tolima',
+      shortName: 'Tolima',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Deportes_Tolima_crest.svg/100px-Deportes_Tolima_crest.svg.png',
+      form: ['W', 'W', 'W', 'D', 'W']
+    },
+    awayTeam: {
+      id: 'bucaramanga',
+      name: 'Atlético Bucaramanga',
+      shortName: 'Bucaramanga',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Escudo_del_Club_Atl%C3%A9tico_Bucaramanga.svg/100px-Escudo_del_Club_Atl%C3%A9tico_Bucaramanga.svg.png',
+      form: ['D', 'L', 'W', 'L', 'D']
+    },
+    score: { home: null, away: null },
+    venue: 'Estadio Manuel Murillo Toro (Ibagué)',
+    isMock: true,
+    statistics: {
+      possession: { home: 58, away: 42 },
+      shotsOnTarget: { home: 6, away: 2 },
+      totalShots: { home: 14, away: 7 },
+      corners: { home: 7, away: 3 },
+      fouls: { home: 10, away: 14 },
+      xg: { home: 1.78, away: 0.62 }
+    },
+    headToHead: {
+      totalMatches: 8,
+      homeWins: 5,
+      awayWins: 1,
+      draws: 2,
+      recentMatches: []
+    },
+    injuries: { home: [], away: [] }
   }
 ];
 
