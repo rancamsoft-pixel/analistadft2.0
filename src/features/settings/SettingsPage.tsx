@@ -199,10 +199,6 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <Loader label="Cargando tu configuración personalizada..." />;
-  }
-
   const filteredCompetitions = useMemo(() =>
     availableComps.filter(c => {
       const matchesText = c.name.toLowerCase().includes(compSearch.toLowerCase()) ||
@@ -223,6 +219,10 @@ export const SettingsPage: React.FC = () => {
     ),
     [availableBookmakers, bkCategoryFilter]
   );
+
+  if (loading) {
+    return <Loader label="Cargando tu configuración personalizada..." />;
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
