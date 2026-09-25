@@ -10,6 +10,7 @@ const prediction_service_js_1 = require("./prediction/prediction.service.js");
 const context_analysis_service_js_1 = require("./services/context.analysis.service.js");
 const logger_js_1 = require("./utils/logger.js");
 const index_js_1 = require("./config/index.js");
+const colombiaDate_js_1 = require("./utils/colombiaDate.js");
 var scheduledSync_job_js_1 = require("./jobs/scheduledSync.job.js");
 Object.defineProperty(exports, "syncOddsJob", { enumerable: true, get: function () { return scheduledSync_job_js_1.syncOddsJob; } });
 var dailyAnalysis_job_js_1 = require("./jobs/dailyAnalysis.job.js");
@@ -456,7 +457,7 @@ exports.getUserParlays = (0, https_1.onRequest)({ cors: true }, async (req, res)
             meta: {
                 userId,
                 count: parlays.length,
-                date: date || new Date().toISOString().split('T')[0]
+                date: date || (0, colombiaDate_js_1.getColombiaTodayString)()
             }
         });
     }

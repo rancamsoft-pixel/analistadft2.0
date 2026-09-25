@@ -13,6 +13,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { DailyAnalysisOrchestrator } from './dailyAnalysis.orchestrator.js';
 import { StructuredLogger } from '../utils/logger.js';
 import { apiUsageManager } from '../services/apiUsageManager.js';
+import { getColombiaTodayString } from '../utils/colombiaDate.js';
 
 const logger = new StructuredLogger('DailyAnalysisJob');
 
@@ -81,7 +82,7 @@ export const triggerDailyAnalysisNow = onRequest({ cors: true }, async (req, res
 
   // 3. Ejecutar Pipeline
   const force = !!req.body?.force;
-  const date = (req.body?.date as string) || new Date().toISOString().split('T')[0]!;
+  const date = (req.body?.date as string) || getColombiaTodayString();
 
   lastManualExecutionTimestamp = now;
   logger.info(`[ADMIN TRIGGER] Ejecutando análisis manual solicitado para ${date} (force: ${force})`);

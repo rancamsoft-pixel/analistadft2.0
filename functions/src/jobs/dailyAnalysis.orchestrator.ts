@@ -24,6 +24,7 @@ import { ParlayExplainer } from '../parlays/parlay.explainer.js';
 import { FCMService } from '../notifications/fcm.service.js';
 import { ParlaySelection, SavedParlay, ParlayCandidate, ParlayDisplayCategory } from '../parlays/parlay.interface.js';
 import { StructuredLogger } from '../utils/logger.js';
+import { getColombiaTodayString } from '../utils/colombiaDate.js';
 
 const logger = new StructuredLogger('DailyAnalysisOrchestrator');
 
@@ -49,7 +50,7 @@ export class DailyAnalysisOrchestrator {
     forcedDate?: string,
     force: boolean = false
   ): Promise<DailyJobLog> {
-    const today = forcedDate || new Date().toISOString().split('T')[0]!;
+    const today = forcedDate || getColombiaTodayString();
     const startTime = Date.now();
     const workerId = `worker_${process.pid}_${Math.random().toString(36).substring(2, 7)}`;
 

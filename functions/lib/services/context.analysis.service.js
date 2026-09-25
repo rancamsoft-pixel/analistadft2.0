@@ -29,6 +29,7 @@ const mock_context_provider_js_1 = require("../providers/ai/mock.context.provide
 const cache_service_js_1 = require("./cache.service.js");
 const logger_js_1 = require("../utils/logger.js");
 const index_js_1 = require("../config/index.js");
+const colombiaDate_js_1 = require("../utils/colombiaDate.js");
 const logger = new logger_js_1.StructuredLogger('ContextAnalysisService');
 // ---------------------------------------------------------------------------
 // ContextAnalysisService
@@ -113,7 +114,7 @@ class ContextAnalysisService {
     }
     async executeAnalysis(input, inputHash, cacheKey) {
         const startMs = Date.now();
-        const analysisId = `ctx_${input.matchId}_${new Date().toISOString().split('T')[0]}_${inputHash.slice(0, 8)}`;
+        const analysisId = `ctx_${input.matchId}_${(0, colombiaDate_js_1.getColombiaTodayString)()}_${inputHash.slice(0, 8)}`;
         let output = null;
         let error;
         let wasRepaired = false;

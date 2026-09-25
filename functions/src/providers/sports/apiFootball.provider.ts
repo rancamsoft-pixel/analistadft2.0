@@ -19,6 +19,7 @@ import { ConcurrencyQueue } from '../../utils/concurrencyQueue.js';
 import { withRetry } from '../../utils/retry.js';
 import { CircuitBreaker } from '../../utils/circuitBreaker.js';
 import { StructuredLogger } from '../../utils/logger.js';
+import { getColombiaTodayString } from '../../utils/colombiaDate.js';
 
 export class ApiFootballProvider implements SportsDataProvider {
   readonly providerName = 'ApiFootballProvider';
@@ -157,7 +158,7 @@ export class ApiFootballProvider implements SportsDataProvider {
 
   // 3. Obtener próximos partidos
   async getUpcomingMatches(competitionId?: string, date?: string): Promise<SportMatch[]> {
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const targetDate = date || getColombiaTodayString();
     const compParam = competitionId ? `&league=${competitionId}` : '';
     const cacheKey = `apifootball:fixtures:upcoming:${competitionId || 'all'}:${targetDate}`;
 
@@ -165,7 +166,7 @@ export class ApiFootballProvider implements SportsDataProvider {
     if (cached) return cached;
 
     const raw = await this.executeFetch<any[]>(
-      `/fixtures?date=${targetDate}&status=NS${compParam}`,
+      `/fixtures?date=${targetDate}&timezone=America/Bogota&status=NS${compParam}`,
       'getUpcomingMatches'
     );
     const normalized = (raw || []).map(r => ApiFootballNormalizer.normalizeMatch(r));
@@ -329,7 +330,7 @@ export class ApiFootballProvider implements SportsDataProvider {
     if (cached) return cached;
 
     const raw = await this.executeFetch<any[]>(
-      `/fixtures?live=all${compParam}`,
+      `/fixtures?live=all&timezone=America/Bogota${compParam}`,
       'getLiveMatches'
     );
     const normalized = (raw || []).map(r => ApiFootballNormalizer.normalizeMatch(r));
@@ -346,7 +347,7 @@ export class ApiFootballProvider implements SportsDataProvider {
     const cached = sportsCache.get<SportMatchDetails>(cacheKey);
     if (cached) return cached;
 
-    const raw = await this.executeFetch<any[]>(`/fixtures?id=${cleanId}`, 'getMatchDetails');
+    const raw = await this.executeFetch<any[]>(`/fixtures?id=${cleanId}&timezone=America/Bogota`, 'getMatchDetails');
     const baseMatch = ApiFootballNormalizer.normalizeMatch(raw?.[0]);
 
     // Consultar stats opcionales con tolerancia a fallos

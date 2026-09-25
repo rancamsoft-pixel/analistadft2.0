@@ -34,6 +34,14 @@ import {
   matchesMatchDateFilter,
   DateFilterOption
 } from '../../utils/parlayAvailability';
+import {
+  getColombiaTodayString,
+  getColombiaTomorrowString,
+  formatColombiaFullDate,
+  formatColombiaShortDate,
+  formatColombiaTime,
+  getColombiaHour
+} from '../../utils/colombiaDate';
 import { SportMatch, UserPreferences } from '../../types/domain';
 import { UserSettingsService } from '../../services/userSettings.service';
 
@@ -62,9 +70,9 @@ export const DashboardPage: React.FC = () => {
       const activeDate = customDate
         ? customDate
         : dateFilter === 'TODAY'
-        ? new Date().toISOString().split('T')[0]
+        ? getColombiaTodayString()
         : dateFilter === 'TOMORROW'
-        ? new Date(Date.now() + 86400000).toISOString().split('T')[0]
+        ? getColombiaTomorrowString()
         : undefined;
 
       const [parlayData, matchesList, prefs] = await Promise.all([
@@ -78,10 +86,7 @@ export const DashboardPage: React.FC = () => {
       if (prefs) setUserPrefs(prefs);
 
       if (parlayData && parlayData.length > 0 && parlayData[0]?.generatedAt) {
-        const genDate = new Date(parlayData[0].generatedAt);
-        setLastUpdated(
-          genDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-        );
+        setLastUpdated(formatColombiaTime(parlayData[0].generatedAt));
       }
     } catch (err) {
       console.error('Error cargando datos del dashboard:', err);
@@ -101,14 +106,14 @@ export const DashboardPage: React.FC = () => {
       const activeDate = customDate
         ? customDate
         : dateFilter === 'TODAY'
-        ? new Date().toISOString().split('T')[0]
+        ? getColombiaTodayString()
         : undefined;
 
       const fresh = await ApiClient.generateUserParlays(user.id, activeDate);
       const freshMatches = await ApiClient.getMatches('all');
       setParlays(fresh);
       setDailyMatches(freshMatches);
-      const nowTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const nowTime = formatColombiaTime(new Date());
       setLastUpdated(`Hoy ${nowTime}`);
       setFeedbackMsg('¡Análisis, cuotas y combinadas actualizadas con éxito!');
       setTimeout(() => setFeedbackMsg(null), 4000);
@@ -119,16 +124,11 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
-  // Formato de fecha actual en español
-  const formattedToday = new Intl.DateTimeFormat('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  }).format(new Date());
+  // Formato de fecha actual en español de Colombia
+  const formattedToday = formatColombiaFullDate(new Date());
 
-  // Saludo amigable según la hora
-  const hour = new Date().getHours();
+  // Saludo amigable según la hora en Colombia
+  const hour = getColombiaHour();
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
   const userName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'Analista';
 
@@ -754,9 +754,8 @@ export const DashboardPage: React.FC = () => {
             {/* Timeline / Lista de selecciones ordenadas por fecha */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {parlayPaciencia.selections.map((sel, idx) => {
-                const matchDate = new Date(sel.utcDate);
-                const dayName = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-                const matchHour = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                const dayName = formatColombiaShortDate(sel.utcDate);
+                const matchHour = formatColombiaTime(sel.utcDate);
 
                 return (
                   <div
@@ -1021,8 +1020,9 @@ export const DashboardPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
               {filteredMatches.map(m => {
                 const isLive = m.status === 'LIVE';
-                const matchTime = new Date(m.utcDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                const matchDay = new Date(m.utcDate).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                const isFinished = m.status === 'FINISHED';
+                const matchTime = formatColombiaTime(m.utcDate);
+                const matchDay = formatColombiaShortDate(m.utcDate);
 
                 return (
                   <Card
@@ -1052,6 +1052,11 @@ export const DashboardPage: React.FC = () => {
                           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', marginRight: '4px', display: 'inline-block' }} />
                           EN VIVO {m.minute ? `${m.minute}'` : ''}
                         </Badge>
+                      ) : isFinished ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          <Clock size={12} />
+                          <span>Finalizado • {matchDay}</span>
+                        </div>
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.74rem', color: 'var(--accent-cyan)' }}>
                           <Clock size={12} />
@@ -1078,7 +1083,7 @@ export const DashboardPage: React.FC = () => {
 
                       {/* VS o Score */}
                       <div style={{ padding: '0.3rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', fontWeight: 800, fontSize: '0.88rem' }}>
-                        {isLive && m.score?.home !== null
+                        {(isLive || isFinished) && m.score?.home !== null
                           ? `${m.score.home} - ${m.score.away}`
                           : 'VS'}
                       </div>

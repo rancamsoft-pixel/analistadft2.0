@@ -20,6 +20,7 @@ const parlay_engine_js_1 = require("../parlays/parlay.engine.js");
 const parlay_explainer_js_1 = require("../parlays/parlay.explainer.js");
 const fcm_service_js_1 = require("../notifications/fcm.service.js");
 const logger_js_1 = require("../utils/logger.js");
+const colombiaDate_js_1 = require("../utils/colombiaDate.js");
 const logger = new logger_js_1.StructuredLogger('DailyAnalysisOrchestrator');
 class DailyAnalysisOrchestrator {
     db;
@@ -38,7 +39,7 @@ class DailyAnalysisOrchestrator {
      * Ejecuta el pipeline completo del análisis diario
      */
     async runDailyPipeline(forcedDate, force = false) {
-        const today = forcedDate || new Date().toISOString().split('T')[0];
+        const today = forcedDate || (0, colombiaDate_js_1.getColombiaTodayString)();
         const startTime = Date.now();
         const workerId = `worker_${process.pid}_${Math.random().toString(36).substring(2, 7)}`;
         logger.info(`=== INICIANDO AGENTE DIARIO AUTOMÁTICO PARA ${today} (Instance: ${workerId}) ===`);

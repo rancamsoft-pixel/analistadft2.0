@@ -15,6 +15,7 @@ const https_1 = require("firebase-functions/v2/https");
 const dailyAnalysis_orchestrator_js_1 = require("./dailyAnalysis.orchestrator.js");
 const logger_js_1 = require("../utils/logger.js");
 const apiUsageManager_js_1 = require("../services/apiUsageManager.js");
+const colombiaDate_js_1 = require("../utils/colombiaDate.js");
 const logger = new logger_js_1.StructuredLogger('DailyAnalysisJob');
 // Cooldown para ejecuciones manuales del admin (mínimo 5 minutos entre ejecuciones)
 let lastManualExecutionTimestamp = 0;
@@ -74,7 +75,7 @@ exports.triggerDailyAnalysisNow = (0, https_1.onRequest)({ cors: true }, async (
     }
     // 3. Ejecutar Pipeline
     const force = !!req.body?.force;
-    const date = req.body?.date || new Date().toISOString().split('T')[0];
+    const date = req.body?.date || (0, colombiaDate_js_1.getColombiaTodayString)();
     lastManualExecutionTimestamp = now;
     logger.info(`[ADMIN TRIGGER] Ejecutando análisis manual solicitado para ${date} (force: ${force})`);
     try {

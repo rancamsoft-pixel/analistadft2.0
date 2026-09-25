@@ -7,6 +7,7 @@ import { PredictionService } from './prediction/prediction.service.js';
 import { ContextAnalysisService } from './services/context.analysis.service.js';
 import { StructuredLogger } from './utils/logger.js';
 import { config } from './config/index.js';
+import { getColombiaTodayString } from './utils/colombiaDate.js';
 
 export { syncOddsJob } from './jobs/scheduledSync.job.js';
 export { dailyAnalysisJob, triggerDailyAnalysisNow } from './jobs/dailyAnalysis.job.js';
@@ -502,7 +503,7 @@ export const getUserParlays = onRequest({ cors: true }, async (req, res) => {
       meta: {
         userId,
         count: parlays.length,
-        date: date || new Date().toISOString().split('T')[0]
+        date: date || getColombiaTodayString()
       }
     });
   } catch (error) {

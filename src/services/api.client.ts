@@ -16,11 +16,12 @@ import {
 } from '../types/domain';
 import {
   CLIENT_MOCK_COMPETITIONS,
-  CLIENT_MOCK_MATCHES,
   CLIENT_MOCK_ODDS,
-  CLIENT_MOCK_ANALYSIS
+  CLIENT_MOCK_ANALYSIS,
+  getClientMockMatches
 } from './mock/fixtures';
 import { ParlayCalculator } from '../utils/parlayCalculator';
+import { getColombiaTodayString, getColombiaTomorrowString, createColombiaMatchTimestamp } from '../utils/colombiaDate';
 
 export class ApiClient {
   private static async mockDelay(ms: number = 180): Promise<void> {
@@ -41,7 +42,7 @@ export class ApiClient {
   static async getMatches(type: 'all' | 'live' | 'upcoming' = 'all', competitionId?: string): Promise<SportMatch[]> {
     if (env.useMockData) {
       await this.mockDelay();
-      let list = CLIENT_MOCK_MATCHES;
+      let list = getClientMockMatches();
       if (type === 'live') {
         list = list.filter(m => m.status === 'LIVE');
       } else if (type === 'upcoming') {
@@ -62,15 +63,16 @@ export class ApiClient {
   static async getMatchDetails(matchId: string): Promise<SportMatchDetails> {
     if (env.useMockData) {
       await this.mockDelay();
-      const found = CLIENT_MOCK_MATCHES.find(m => m.id === matchId)
-        || (matchId.includes('col-2') || matchId.includes('nacional') || matchId.includes('millonarios') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-2') : null)
-        || (matchId.includes('col-1') || matchId.includes('junior') || matchId.includes('santa-fe') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-1') : null)
-        || (matchId.includes('col-3') || matchId.includes('america') || matchId.includes('cali') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-3') : null)
-        || (matchId.includes('col-4') || matchId.includes('medellin') || matchId.includes('once') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-4') : null)
-        || (matchId.includes('col-5') || matchId.includes('tolima') || matchId.includes('bucaramanga') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-5') : null)
-        || (matchId.includes('pd') || matchId.includes('madrid') || matchId.includes('barca') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-102') : null)
-        || (matchId.includes('city') || matchId.includes('liverpool') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-103') : null)
-        || CLIENT_MOCK_MATCHES[0]!;
+      const allMatches = getClientMockMatches();
+      const found = allMatches.find(m => m.id === matchId)
+        || (matchId.includes('col-2') || matchId.includes('nacional') || matchId.includes('millonarios') ? allMatches.find(m => m.id === 'match-col-2') : null)
+        || (matchId.includes('col-1') || matchId.includes('junior') || matchId.includes('santa-fe') ? allMatches.find(m => m.id === 'match-col-1') : null)
+        || (matchId.includes('col-3') || matchId.includes('america') || matchId.includes('cali') ? allMatches.find(m => m.id === 'match-col-3') : null)
+        || (matchId.includes('col-4') || matchId.includes('medellin') || matchId.includes('once') ? allMatches.find(m => m.id === 'match-col-4') : null)
+        || (matchId.includes('col-5') || matchId.includes('tolima') || matchId.includes('bucaramanga') ? allMatches.find(m => m.id === 'match-col-5') : null)
+        || (matchId.includes('pd') || matchId.includes('madrid') || matchId.includes('barca') ? allMatches.find(m => m.id === 'match-102') : null)
+        || (matchId.includes('city') || matchId.includes('liverpool') ? allMatches.find(m => m.id === 'match-103') : null)
+        || allMatches[0]!;
       return found!;
     }
 
@@ -191,7 +193,7 @@ export class ApiClient {
         message: 'Sincronización simulada en Modo Mock completada.',
         matchesProcessed: 8,
         stats: {
-          today: new Date().toISOString().split('T')[0],
+          today: getColombiaTodayString(),
           limit: 80,
           used: 12,
           remaining: 68,
@@ -219,7 +221,7 @@ export class ApiClient {
       return {
         success: true,
         stats: {
-          today: new Date().toISOString().split('T')[0] || '2026-09-22',
+          today: getColombiaTodayString(),
           limit: 80,
           used: 12,
           remaining: 68,
@@ -247,12 +249,12 @@ export class ApiClient {
         : ['betplay', 'wplay', 'rushbet', 'codere_co', 'pinnacle', 'bet365'];
 
       // Encontrar información real del partido para no devolver siempre Arsenal vs Chelsea
-      const match = CLIENT_MOCK_MATCHES.find(m => m.id === eventId)
-        || (eventId.includes('col-2') || eventId.includes('nacional') || eventId.includes('millonarios') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-2') : null)
-        || (eventId.includes('col-3') || eventId.includes('america') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-3') : null)
-        || (eventId.includes('col-1') || eventId.includes('junior') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-1') : null)
-        || (eventId.includes('102') || eventId.includes('madrid') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-102') : null)
-        || CLIENT_MOCK_MATCHES[0]!;
+      const match = getClientMockMatches().find(m => m.id === eventId)
+        || (eventId.includes('col-2') || eventId.includes('nacional') || eventId.includes('millonarios') ? getClientMockMatches().find(m => m.id === 'match-col-2') : null)
+        || (eventId.includes('col-3') || eventId.includes('america') ? getClientMockMatches().find(m => m.id === 'match-col-3') : null)
+        || (eventId.includes('col-1') || eventId.includes('junior') ? getClientMockMatches().find(m => m.id === 'match-col-1') : null)
+        || (eventId.includes('102') || eventId.includes('madrid') ? getClientMockMatches().find(m => m.id === 'match-102') : null)
+        || getClientMockMatches()[0]!;
 
       const existingOdds = CLIENT_MOCK_ODDS[eventId] || CLIENT_MOCK_ODDS[match.id];
 
@@ -441,14 +443,15 @@ export class ApiClient {
   }
 
   private static getMockUserParlays(userId: string, date?: string): SavedParlay[] {
-    const today = date || new Date().toISOString().split('T')[0]!;
-    const now = Date.now();
+    const today = date || getColombiaTodayString();
+    const isTomorrow = today === getColombiaTomorrowString();
+    const daysOffset = isTomorrow ? 1 : 0;
 
-    // Tiempos dinámicos para que los eventos estén abiertos y con fechas escalonadas
-    const timeTodaySoon = new Date(now + 1000 * 60 * 150).toISOString(); // en 2.5h (Hoy)
-    const timeTodayEvening = new Date(now + 1000 * 60 * 360).toISOString(); // en 6h (Hoy)
-    const timeTomorrow = new Date(now + 1000 * 60 * 60 * 28).toISOString(); // en 28h (Mañana)
-    const timeDayAfter = new Date(now + 1000 * 60 * 60 * 52).toISOString(); // en 52h (Fin de semana)
+    // Tiempos anclados exactamente al calendario de Colombia
+    const timeTodaySoon = createColombiaMatchTimestamp(daysOffset, 18, 0);
+    const timeTodayEvening = createColombiaMatchTimestamp(daysOffset, 20, 15);
+    const timeTomorrow = createColombiaMatchTimestamp(daysOffset + 1, 19, 30);
+    const timeDayAfter = createColombiaMatchTimestamp(daysOffset + 2, 18, 10);
 
     // Leer preferencias locales si existen para simular personalización por usuario
     let activeComps = ['PL', 'PD'];

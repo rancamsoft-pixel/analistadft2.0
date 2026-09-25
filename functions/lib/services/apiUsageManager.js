@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiUsageManager = exports.ApiUsageManager = void 0;
 const logger_js_1 = require("../utils/logger.js");
+const colombiaDate_js_1 = require("../utils/colombiaDate.js");
 class ApiUsageManager {
     static instance;
     logger = new logger_js_1.StructuredLogger('ApiUsageManager');
@@ -19,7 +20,7 @@ class ApiUsageManager {
         return ApiUsageManager.instance;
     }
     getTodayString() {
-        return new Date().toISOString().split('T')[0];
+        return (0, colombiaDate_js_1.getColombiaTodayString)();
     }
     /**
      * Comprueba si el presupuesto permite realizar una nueva petición externa

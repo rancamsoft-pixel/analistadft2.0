@@ -23,6 +23,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { ApiClient } from '../../services/api.client';
 import { useAuth } from '../auth/AuthContext';
 import { UserSettingsService } from '../../services/userSettings.service';
+import { formatColombiaShortDate, formatColombiaTime } from '../../utils/colombiaDate';
 
 export const ParlaysPage: React.FC = () => {
   const { user } = useAuth();
@@ -319,9 +320,8 @@ export const ParlaysPage: React.FC = () => {
             {/* Timeline / Selecciones escalonadas en varios días */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem', marginTop: '1rem' }}>
               {parlayPaciencia.selections.map((sel, idx) => {
-                const matchDate = new Date(sel.utcDate);
-                const dayName = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-                const matchHour = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                const dayName = formatColombiaShortDate(sel.utcDate);
+                const matchHour = formatColombiaTime(sel.utcDate);
 
                 return (
                   <div key={idx} style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>

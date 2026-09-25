@@ -8,6 +8,7 @@ const concurrencyQueue_js_1 = require("../../utils/concurrencyQueue.js");
 const retry_js_1 = require("../../utils/retry.js");
 const circuitBreaker_js_1 = require("../../utils/circuitBreaker.js");
 const logger_js_1 = require("../../utils/logger.js");
+const colombiaDate_js_1 = require("../../utils/colombiaDate.js");
 class ApiFootballProvider {
     providerName = 'ApiFootballProvider';
     apiKey;
@@ -133,13 +134,13 @@ class ApiFootballProvider {
     }
     // 3. Obtener próximos partidos
     async getUpcomingMatches(competitionId, date) {
-        const targetDate = date || new Date().toISOString().split('T')[0];
+        const targetDate = date || (0, colombiaDate_js_1.getColombiaTodayString)();
         const compParam = competitionId ? `&league=${competitionId}` : '';
         const cacheKey = `apifootball:fixtures:upcoming:${competitionId || 'all'}:${targetDate}`;
         const cached = sportsCache_service_js_1.sportsCache.get(cacheKey);
         if (cached)
             return cached;
-        const raw = await this.executeFetch(`/fixtures?date=${targetDate}&status=NS${compParam}`, 'getUpcomingMatches');
+        const raw = await this.executeFetch(`/fixtures?date=${targetDate}&timezone=America/Bogota&status=NS${compParam}`, 'getUpcomingMatches');
         const normalized = (raw || []).map(r => apiFootball_normalizer_js_1.ApiFootballNormalizer.normalizeMatch(r));
         // Cache con TTL de 6 horas
         sportsCache_service_js_1.sportsCache.set(cacheKey, normalized, sportsCache_service_js_1.SPORTS_CACHE_TTL.FIXTURES);
@@ -251,7 +252,7 @@ class ApiFootballProvider {
         const cached = sportsCache_service_js_1.sportsCache.get(cacheKey);
         if (cached)
             return cached;
-        const raw = await this.executeFetch(`/fixtures?live=all${compParam}`, 'getLiveMatches');
+        const raw = await this.executeFetch(`/fixtures?live=all&timezone=America/Bogota${compParam}`, 'getLiveMatches');
         const normalized = (raw || []).map(r => apiFootball_normalizer_js_1.ApiFootballNormalizer.normalizeMatch(r));
         sportsCache_service_js_1.sportsCache.set(cacheKey, normalized, 45);
         return normalized;
@@ -263,7 +264,7 @@ class ApiFootballProvider {
         const cached = sportsCache_service_js_1.sportsCache.get(cacheKey);
         if (cached)
             return cached;
-        const raw = await this.executeFetch(`/fixtures?id=${cleanId}`, 'getMatchDetails');
+        const raw = await this.executeFetch(`/fixtures?id=${cleanId}&timezone=America/Bogota`, 'getMatchDetails');
         const baseMatch = apiFootball_normalizer_js_1.ApiFootballNormalizer.normalizeMatch(raw?.[0]);
         // Consultar stats opcionales con tolerancia a fallos
         let statistics;

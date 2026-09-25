@@ -1,12 +1,17 @@
+import { COLOMBIA_TIMEZONE } from './colombiaDate';
+
 export function formatDate(isoString: string): string {
   try {
     const d = new Date(isoString);
-    return d.toLocaleDateString('es-ES', {
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleDateString('es-CO', {
+      timeZone: COLOMBIA_TIMEZONE,
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
   } catch {
     return isoString;
@@ -16,9 +21,12 @@ export function formatDate(isoString: string): string {
 export function formatTimeOnly(isoString: string): string {
   try {
     const d = new Date(isoString);
-    return d.toLocaleTimeString('es-ES', {
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleTimeString('es-CO', {
+      timeZone: COLOMBIA_TIMEZONE,
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
   } catch {
     return isoString;

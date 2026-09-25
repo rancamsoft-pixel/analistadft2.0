@@ -23,6 +23,7 @@ import { ApiClient } from '../../services/api.client';
 import { EventOdds, MatchAnalysisResult, SportMatchDetails, MatchOddsComparison } from '../../types/domain';
 import { formatOdds } from '../../utils/odds';
 import { formatDate } from '../../utils/formatters';
+import { formatColombiaTime } from '../../utils/colombiaDate';
 
 import { useAuth } from '../auth/AuthContext';
 import { UserSettingsService } from '../../services/userSettings.service';
@@ -60,7 +61,7 @@ export const MatchDetailPage: React.FC = () => {
         setOdds(oddsData);
         setOddsComparison(comparisonData);
         setAnalysis(existingAnalysis);
-        setLastUpdated(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+        setLastUpdated(formatColombiaTime(new Date()));
       } catch (err) {
         console.error('Error al cargar detalle del partido:', err);
       } finally {
@@ -76,7 +77,7 @@ export const MatchDetailPage: React.FC = () => {
     try {
       const result = await ApiClient.getMatchAnalysis(matchId);
       setAnalysis(result);
-      setLastUpdated(new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+      setLastUpdated(formatColombiaTime(new Date()));
     } catch (err) {
       console.error('Error al generar análisis:', err);
     } finally {

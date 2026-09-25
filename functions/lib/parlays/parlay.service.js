@@ -16,6 +16,7 @@ const firestore_1 = require("firebase-admin/firestore");
 const parlay_engine_js_1 = require("./parlay.engine.js");
 const parlay_explainer_js_1 = require("./parlay.explainer.js");
 const logger_js_1 = require("../utils/logger.js");
+const colombiaDate_js_1 = require("../utils/colombiaDate.js");
 const logger = new logger_js_1.StructuredLogger('ParlayService');
 class ParlayService {
     db;
@@ -27,7 +28,7 @@ class ParlayService {
      */
     async generateAndStoreUserParlays(userId, forcedDate) {
         logger.info(`Generando parlays personalizados para usuario ${userId}`);
-        const date = forcedDate || new Date().toISOString().split('T')[0];
+        const date = forcedDate || (0, colombiaDate_js_1.getColombiaTodayString)();
         // 1. Obtener preferencias del usuario
         const userPrefs = await this.getUserPreferences(userId);
         // 2. Obtener oportunidades válidas del motor estadístico
@@ -71,7 +72,7 @@ class ParlayService {
      */
     async getUserStoredParlays(userId, date) {
         try {
-            const targetDate = date || new Date().toISOString().split('T')[0];
+            const targetDate = date || (0, colombiaDate_js_1.getColombiaTodayString)();
             const snapshot = await this.db
                 .collection('parlays')
                 .where('userId', '==', userId)

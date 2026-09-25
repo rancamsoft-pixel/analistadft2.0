@@ -33,6 +33,7 @@ import { MockContextProvider } from '../providers/ai/mock.context.provider.js';
 import { globalCache } from './cache.service.js';
 import { StructuredLogger } from '../utils/logger.js';
 import { config } from '../config/index.js';
+import { getColombiaTodayString } from '../utils/colombiaDate.js';
 
 const logger = new StructuredLogger('ContextAnalysisService');
 
@@ -151,7 +152,7 @@ export class ContextAnalysisService {
     cacheKey: string
   ): Promise<ContextAnalysisOutput | null> {
     const startMs = Date.now();
-    const analysisId = `ctx_${input.matchId}_${new Date().toISOString().split('T')[0]}_${inputHash.slice(0, 8)}`;
+    const analysisId = `ctx_${input.matchId}_${getColombiaTodayString()}_${inputHash.slice(0, 8)}`;
     let output: ContextAnalysisOutput | null = null;
     let error: string | undefined;
     let wasRepaired = false;

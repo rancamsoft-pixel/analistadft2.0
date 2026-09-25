@@ -22,6 +22,7 @@ import {
 } from './parlay.interface.js';
 import { PredictionResult } from '../prediction/prediction.interface.js';
 import { StructuredLogger } from '../utils/logger.js';
+import { getColombiaTodayString } from '../utils/colombiaDate.js';
 
 const logger = new StructuredLogger('ParlayService');
 
@@ -40,7 +41,7 @@ export class ParlayService {
     forcedDate?: string
   ): Promise<SavedParlay[]> {
     logger.info(`Generando parlays personalizados para usuario ${userId}`);
-    const date = forcedDate || new Date().toISOString().split('T')[0]!;
+    const date = forcedDate || getColombiaTodayString();
 
     // 1. Obtener preferencias del usuario
     const userPrefs = await this.getUserPreferences(userId);
@@ -120,7 +121,7 @@ export class ParlayService {
    */
   async getUserStoredParlays(userId: string, date?: string): Promise<SavedParlay[]> {
     try {
-      const targetDate = date || new Date().toISOString().split('T')[0]!;
+      const targetDate = date || getColombiaTodayString();
       const snapshot = await this.db
         .collection('parlays')
         .where('userId', '==', userId)

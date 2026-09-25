@@ -1,4 +1,5 @@
 import { StructuredLogger } from '../utils/logger.js';
+import { getColombiaTodayString } from '../utils/colombiaDate.js';
 
 export interface RequestLogParams {
   provider: string;
@@ -44,7 +45,7 @@ export class ApiUsageManager {
   }
 
   private getTodayString(): string {
-    return new Date().toISOString().split('T')[0]!;
+    return getColombiaTodayString();
   }
 
   /**

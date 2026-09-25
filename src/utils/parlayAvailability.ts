@@ -56,14 +56,21 @@ export function getTimeUntilFirstMatch(parlay: SavedParlay, refTime: number = Da
   return `Cierra en ${hours}h ${mins}m`;
 }
 
+import {
+  getColombiaDateString,
+  getColombiaTodayString,
+  getColombiaTomorrowString,
+  isColombiaWeekend
+} from './colombiaDate';
+
 /**
- * Verifica si las selecciones de un parlay se disputan en 2 o más días diferentes (Multi-fecha)
+ * Verifica si las selecciones de un parlay se disputan en 2 o más días diferentes (Multi-fecha) según hora Colombia
  */
 export function isMultiDateParlay(parlay: SavedParlay): boolean {
   const dates = new Set<string>();
   parlay.selections.forEach(s => {
     try {
-      const d = new Date(s.utcDate).toISOString().split('T')[0];
+      const d = getColombiaDateString(s.utcDate);
       if (d) dates.add(d);
     } catch {
       // ignore
@@ -73,22 +80,16 @@ export function isMultiDateParlay(parlay: SavedParlay): boolean {
 }
 
 /**
- * Comprueba si una fecha UTC individual coincide con el filtro de fecha
+ * Comprueba si una fecha individual coincide con el filtro de fecha según hora Colombia (America/Bogota)
  */
 export function matchesMatchDateFilter(utcDate: string, filter: DateFilterOption): boolean {
   if (!filter || filter === 'ALL') return true;
 
-  const matchDate = new Date(utcDate);
-  if (isNaN(matchDate.getTime())) return true;
+  const matchDateStr = getColombiaDateString(utcDate);
+  if (!matchDateStr) return true;
 
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0]!;
-  
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0]!;
-
-  const matchDateStr = matchDate.toISOString().split('T')[0]!;
+  const todayStr = getColombiaTodayString();
+  const tomorrowStr = getColombiaTomorrowString();
 
   if (filter === 'TODAY') {
     return matchDateStr === todayStr;
@@ -99,8 +100,7 @@ export function matchesMatchDateFilter(utcDate: string, filter: DateFilterOption
   }
 
   if (filter === 'WEEKEND') {
-    const day = matchDate.getDay(); // 0 Dom, 5 Vie, 6 Sab
-    return day === 5 || day === 6 || day === 0;
+    return isColombiaWeekend(utcDate);
   }
 
   if (filter === 'PACIENCIA_MULTI') {
@@ -112,49 +112,41 @@ export function matchesMatchDateFilter(utcDate: string, filter: DateFilterOption
 }
 
 /**
- * Comprueba si un parlay coincide con el filtro de fecha seleccionado de manera estricta
+ * Comprueba si un parlay coincide con el filtro de fecha seleccionado de manera estricta según hora Colombia
  */
 export function matchesDateFilter(parlay: SavedParlay, filter: DateFilterOption): boolean {
   if (!filter || filter === 'ALL') return true;
 
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0]!;
-  
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0]!;
-
+  const todayStr = getColombiaTodayString();
+  const tomorrowStr = getColombiaTomorrowString();
   const isMulti = isMultiDateParlay(parlay);
 
   if (filter === 'PACIENCIA_MULTI') {
     return parlay.type === 'PACIENCIA_PARLAY' || parlay.displayCategory === 'PACIENCIA' || isMulti;
   }
 
-  // Si el usuario pide un día específico (Hoy, Mañana o fecha exacta), no debe mezclar parleys multi-fecha a menos que todas sus selecciones sean de esa fecha
+  // Si el usuario pide un día específico (Hoy, Mañana o fecha exacta), no debe mezclar parleys multi-fecha
   if (filter === 'TODAY') {
     if (isMulti) return false;
     return parlay.selections.length > 0
-      ? parlay.selections.every(s => s.utcDate.startsWith(todayStr))
-      : parlay.date === todayStr;
+      ? parlay.selections.every(s => getColombiaDateString(s.utcDate) === todayStr)
+      : (parlay.date === todayStr || getColombiaDateString(parlay.date) === todayStr);
   }
 
   if (filter === 'TOMORROW') {
     if (isMulti) return false;
     return parlay.selections.length > 0
-      ? parlay.selections.every(s => s.utcDate.startsWith(tomorrowStr))
-      : parlay.date === tomorrowStr;
+      ? parlay.selections.every(s => getColombiaDateString(s.utcDate) === tomorrowStr)
+      : (parlay.date === tomorrowStr || getColombiaDateString(parlay.date) === tomorrowStr);
   }
 
   if (filter === 'WEEKEND') {
-    return parlay.selections.every(s => {
-      const day = new Date(s.utcDate).getDay(); // 0 Dom, 5 Vie, 6 Sab
-      return day === 5 || day === 6 || day === 0;
-    });
+    return parlay.selections.every(s => isColombiaWeekend(s.utcDate));
   }
 
   // Fecha exacta YYYY-MM-DD
   if (isMulti) return false;
   return parlay.selections.length > 0
-    ? parlay.selections.every(s => s.utcDate.startsWith(filter))
-    : parlay.date === filter;
+    ? parlay.selections.every(s => getColombiaDateString(s.utcDate) === filter)
+    : (parlay.date === filter || getColombiaDateString(parlay.date) === filter);
 }

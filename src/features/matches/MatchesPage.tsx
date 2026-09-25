@@ -322,6 +322,10 @@ export const MatchesPage: React.FC = () => {
                   </span>
                   {match.status === 'LIVE' ? (
                     <Badge variant="live">EN VIVO ({match.minute}')</Badge>
+                  ) : match.status === 'FINISHED' ? (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>Finalizado</span> • {formatDate(match.utcDate)}
+                    </span>
                   ) : (
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {formatDate(match.utcDate)}
@@ -335,7 +339,7 @@ export const MatchesPage: React.FC = () => {
                       <img src={match.homeTeam.logo} alt="" style={{ width: '22px', height: '22px' }} />
                       <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{match.homeTeam.name}</span>
                     </div>
-                    {match.status === 'LIVE' && (
+                    {(match.status === 'LIVE' || match.status === 'FINISHED') && match.score.home !== null && (
                       <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.1rem' }}>
                         {match.score.home}
                       </span>
@@ -346,7 +350,7 @@ export const MatchesPage: React.FC = () => {
                       <img src={match.awayTeam.logo} alt="" style={{ width: '22px', height: '22px' }} />
                       <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{match.awayTeam.name}</span>
                     </div>
-                    {match.status === 'LIVE' && (
+                    {(match.status === 'LIVE' || match.status === 'FINISHED') && match.score.away !== null && (
                       <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 800, fontSize: '1.1rem' }}>
                         {match.score.away}
                       </span>
