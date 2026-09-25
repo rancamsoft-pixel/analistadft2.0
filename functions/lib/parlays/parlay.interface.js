@@ -14,6 +14,7 @@ exports.PARLAY_LIMITS = void 0;
 exports.PARLAY_LIMITS = {
     HIGH_PROBABILITY_PARLAY: { minSelections: 2, maxSelections: 3 },
     VALUE_PARLAY: { minSelections: 2, maxSelections: 4 },
-    BALANCED_PARLAY: { minSelections: 2, maxSelections: 3 }
+    BALANCED_PARLAY: { minSelections: 2, maxSelections: 3 },
+    PACIENCIA_PARLAY: { minSelections: 3, maxSelections: 5 }
 };
 //# sourceMappingURL=parlay.interface.js.map

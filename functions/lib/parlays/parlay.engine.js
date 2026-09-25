@@ -174,6 +174,8 @@ class ParlayEngine {
                     return scoreB - scoreA;
                 })
                     .slice(0, 10);
+            default:
+                return pool.slice(0, 10);
         }
     }
     /**
