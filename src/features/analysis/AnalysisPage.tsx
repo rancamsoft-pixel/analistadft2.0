@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, ShieldCheck } from 'lucide-react';
+import { Zap, ShieldCheck, Calendar, CalendarDays } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Loader } from '../../components/ui/Loader';
 import { ApiClient } from '../../services/api.client';
 import { MatchAnalysisResult, SportMatch } from '../../types/domain';
 import { formatOdds } from '../../utils/odds';
+import { matchesMatchDateFilter, DateFilterOption } from '../../utils/parlayAvailability';
 
 export const AnalysisPage: React.FC = () => {
   const [matches, setMatches] = useState<SportMatch[]>([]);
-  const [selectedMatchId, setSelectedMatchId] = useState<string>('match-101');
+  const [selectedMatchId, setSelectedMatchId] = useState<string>('match-col-2');
+  const [dateFilter, setDateFilter] = useState<DateFilterOption>('ALL');
+  const [customDate, setCustomDate] = useState<string>('');
   const [analysis, setAnalysis] = useState<MatchAnalysisResult | null>(null);
   const [loadingMatches, setLoadingMatches] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -17,11 +20,13 @@ export const AnalysisPage: React.FC = () => {
   useEffect(() => {
     async function load() {
       try {
-        const list = await ApiClient.getMatches('upcoming');
+        const list = await ApiClient.getMatches('all');
         setMatches(list);
-        if (list[0]) {
-          setSelectedMatchId(list[0].id);
-          const initialAnalysis = await ApiClient.getMatchAnalysis(list[0].id);
+        // Priorizar el superclásico colombiano si está disponible
+        const defaultMatch = list.find(m => m.id === 'match-col-2') || list[0];
+        if (defaultMatch) {
+          setSelectedMatchId(defaultMatch.id);
+          const initialAnalysis = await ApiClient.getMatchAnalysis(defaultMatch.id);
           setAnalysis(initialAnalysis);
         }
       } catch (err) {
@@ -46,6 +51,17 @@ export const AnalysisPage: React.FC = () => {
     }
   };
 
+  // Filtrar partidos por fecha seleccionada
+  const activeDate = customDate || dateFilter;
+  const filteredMatches = matches.filter(m => matchesMatchDateFilter(m.utcDate, activeDate));
+
+  // Auto-seleccionar primer partido disponible si el actual queda fuera del filtro
+  useEffect(() => {
+    if (filteredMatches.length > 0 && !filteredMatches.some(m => m.id === selectedMatchId)) {
+      handleSelectMatch(filteredMatches[0]!.id);
+    }
+  }, [dateFilter, customDate, filteredMatches]);
+
   if (loadingMatches) {
     return <Loader label="Cargando motor predictivo cuantitativo..." />;
   }
@@ -59,36 +75,153 @@ export const AnalysisPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Match Selector Strip */}
-      <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-        {matches.map(m => {
-          const isSelected = m.id === selectedMatchId;
-          return (
+      {/* Pestañas de Filtro por Fecha */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', background: 'rgba(255, 255, 255, 0.02)', padding: '0.6rem 0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+        <span style={{ fontSize: '0.78rem', color: 'var(--accent-cyan)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Calendar size={14} /> Filtrar Análisis por Fecha:
+        </span>
+
+        <button
+          type="button"
+          onClick={() => { setDateFilter('ALL'); setCustomDate(''); }}
+          style={{
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
+            border: `1px solid ${dateFilter === 'ALL' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+            background: dateFilter === 'ALL' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+            color: dateFilter === 'ALL' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          Todas las fechas
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setDateFilter('TODAY'); setCustomDate(''); }}
+          style={{
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
+            border: `1px solid ${dateFilter === 'TODAY' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+            background: dateFilter === 'TODAY' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+            color: dateFilter === 'TODAY' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          Hoy
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setDateFilter('TOMORROW'); setCustomDate(''); }}
+          style={{
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
+            border: `1px solid ${dateFilter === 'TOMORROW' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+            background: dateFilter === 'TOMORROW' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+            color: dateFilter === 'TOMORROW' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          Mañana
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setDateFilter('WEEKEND'); setCustomDate(''); }}
+          style={{
+            padding: '0.3rem 0.65rem',
+            borderRadius: '6px',
+            border: `1px solid ${dateFilter === 'WEEKEND' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+            background: dateFilter === 'WEEKEND' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+            color: dateFilter === 'WEEKEND' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+            fontSize: '0.76rem',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          Fin de semana
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginLeft: 'auto' }}>
+          <CalendarDays size={14} color="var(--text-muted)" />
+          <input
+            type="date"
+            value={customDate}
+            onChange={e => {
+              setCustomDate(e.target.value);
+              setDateFilter(e.target.value);
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '6px',
+              padding: '0.2rem 0.45rem',
+              fontSize: '0.75rem',
+              color: 'var(--text-primary)',
+              colorScheme: 'dark'
+            }}
+          />
+          {customDate && (
             <button
-              key={m.id}
-              onClick={() => handleSelectMatch(m.id)}
+              type="button"
+              onClick={() => { setCustomDate(''); setDateFilter('ALL'); }}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.65rem',
-                padding: '0.6rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                background: isSelected ? 'rgba(6, 182, 212, 0.18)' : 'rgba(255, 255, 255, 0.04)',
-                border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                color: isSelected ? '#ffffff' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '0.75rem',
+                cursor: 'pointer'
               }}
             >
-              <img src={m.competition.emblem} alt="" style={{ width: '16px', height: '16px' }} />
-              <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                {m.homeTeam.shortName} vs {m.awayTeam.shortName}
-              </span>
+              ✕
             </button>
-          );
-        })}
+          )}
+        </div>
       </div>
+
+      {/* Match Selector Strip */}
+      {filteredMatches.length === 0 ? (
+        <Card style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          No hay partidos para analizar en la fecha seleccionada. Cambia la fecha en el filtro superior.
+        </Card>
+      ) : (
+        <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          {filteredMatches.map(m => {
+            const isSelected = m.id === selectedMatchId;
+            return (
+              <button
+                key={m.id}
+                onClick={() => handleSelectMatch(m.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  padding: '0.6rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: isSelected ? 'rgba(6, 182, 212, 0.18)' : 'rgba(255, 255, 255, 0.04)',
+                  border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                  color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <img src={m.competition.emblem} alt="" style={{ width: '16px', height: '16px' }} />
+                <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                  {m.homeTeam.shortName} vs {m.awayTeam.shortName}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {analyzing ? (
         <Loader label="Calculando regresión, xG y probabilidades de Poisson..." />

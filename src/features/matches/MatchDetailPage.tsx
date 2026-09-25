@@ -24,9 +24,13 @@ import { EventOdds, MatchAnalysisResult, SportMatchDetails, MatchOddsComparison 
 import { formatOdds } from '../../utils/odds';
 import { formatDate } from '../../utils/formatters';
 
+import { useAuth } from '../auth/AuthContext';
+import { UserSettingsService } from '../../services/userSettings.service';
+
 export const MatchDetailPage: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [match, setMatch] = useState<SportMatchDetails | null>(null);
   const [odds, setOdds] = useState<EventOdds | null>(null);
@@ -41,10 +45,15 @@ export const MatchDetailPage: React.FC = () => {
     async function loadDetails() {
       if (!matchId) return;
       try {
+        const userPrefs = user?.id ? await UserSettingsService.getUserPreferences(user.id).catch(() => null) : null;
+        const activeBks = userPrefs?.activeBookmakerIds && userPrefs.activeBookmakerIds.length > 0
+          ? userPrefs.activeBookmakerIds
+          : undefined;
+
         const [matchData, oddsData, comparisonData, existingAnalysis] = await Promise.all([
           ApiClient.getMatchDetails(matchId),
           ApiClient.getMatchOdds(matchId).catch(() => null),
-          ApiClient.getMatchOddsComparison(matchId).catch(() => null),
+          ApiClient.getMatchOddsComparison(matchId, undefined, activeBks).catch(() => null),
           ApiClient.getMatchAnalysis(matchId).catch(() => null)
         ]);
         setMatch(matchData);
@@ -59,7 +68,7 @@ export const MatchDetailPage: React.FC = () => {
       }
     }
     loadDetails();
-  }, [matchId]);
+  }, [matchId, user]);
 
   const handleGenerateAnalysis = async () => {
     if (!matchId) return;

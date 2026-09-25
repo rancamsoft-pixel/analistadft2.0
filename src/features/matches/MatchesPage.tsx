@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Flame, Calendar, Zap } from 'lucide-react';
+import { Search, Flame, Calendar, Zap, CalendarDays } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -10,12 +10,15 @@ import { ApiClient } from '../../services/api.client';
 import { Competition, SportMatch } from '../../types/domain';
 import { formatOdds } from '../../utils/odds';
 import { formatDate } from '../../utils/formatters';
+import { matchesMatchDateFilter, DateFilterOption } from '../../utils/parlayAvailability';
 
 export const MatchesPage: React.FC = () => {
   const navigate = useNavigate();
   const [matches, setMatches] = useState<SportMatch[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [statusFilter, setStatusFilter] = useState<'all' | 'live' | 'upcoming'>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilterOption>('ALL');
+  const [customDate, setCustomDate] = useState<string>('');
   const [selectedComp, setSelectedComp] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,13 @@ export const MatchesPage: React.FC = () => {
   }, [statusFilter, selectedComp]);
 
   const filteredMatches = matches.filter(m => {
+    // 1. Filtro estricto por fecha
+    const activeDate = customDate || dateFilter;
+    if (!matchesMatchDateFilter(m.utcDate, activeDate)) {
+      return false;
+    }
+
+    // 2. Filtro por buscador
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -124,6 +134,117 @@ export const MatchesPage: React.FC = () => {
               onChange={e => setSearchQuery(e.target.value)}
               leftIcon={<Search size={16} />}
             />
+          </div>
+        </div>
+
+        {/* Pestañas de Filtro por Fecha */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', background: 'rgba(255, 255, 255, 0.02)', padding: '0.6rem 0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--accent-cyan)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Calendar size={14} /> Fecha:
+          </span>
+
+          <button
+            type="button"
+            onClick={() => { setDateFilter('ALL'); setCustomDate(''); }}
+            style={{
+              padding: '0.3rem 0.65rem',
+              borderRadius: '6px',
+              border: `1px solid ${dateFilter === 'ALL' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+              background: dateFilter === 'ALL' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+              color: dateFilter === 'ALL' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Todas las fechas
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setDateFilter('TODAY'); setCustomDate(''); }}
+            style={{
+              padding: '0.3rem 0.65rem',
+              borderRadius: '6px',
+              border: `1px solid ${dateFilter === 'TODAY' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+              background: dateFilter === 'TODAY' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+              color: dateFilter === 'TODAY' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Hoy
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setDateFilter('TOMORROW'); setCustomDate(''); }}
+            style={{
+              padding: '0.3rem 0.65rem',
+              borderRadius: '6px',
+              border: `1px solid ${dateFilter === 'TOMORROW' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+              background: dateFilter === 'TOMORROW' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+              color: dateFilter === 'TOMORROW' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Mañana
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setDateFilter('WEEKEND'); setCustomDate(''); }}
+            style={{
+              padding: '0.3rem 0.65rem',
+              borderRadius: '6px',
+              border: `1px solid ${dateFilter === 'WEEKEND' && !customDate ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+              background: dateFilter === 'WEEKEND' && !customDate ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+              color: dateFilter === 'WEEKEND' && !customDate ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Fin de semana
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginLeft: 'auto' }}>
+            <CalendarDays size={14} color="var(--text-muted)" />
+            <input
+              type="date"
+              value={customDate}
+              onChange={e => {
+                setCustomDate(e.target.value);
+                setDateFilter(e.target.value);
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '6px',
+                padding: '0.2rem 0.45rem',
+                fontSize: '0.75rem',
+                color: 'var(--text-primary)',
+                colorScheme: 'dark'
+              }}
+            />
+            {customDate && (
+              <button
+                type="button"
+                onClick={() => { setCustomDate(''); setDateFilter('ALL'); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 

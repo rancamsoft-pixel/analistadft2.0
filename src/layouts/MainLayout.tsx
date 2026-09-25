@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
   TrendingUp,
@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Zap,
   WifiOff,
-  ShieldAlert
+  ShieldAlert,
+  Menu,
+  X
 } from 'lucide-react';
 import { MockBanner } from '../components/ui/MockBanner';
 import { useAuth } from '../features/auth/AuthContext';
@@ -22,6 +24,7 @@ export const MainLayout: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const isOnline = useOnlineStatus();
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   const navigationItems = [
     { label: 'Dashboard', path: '/', icon: <TrendingUp size={19} /> },
@@ -60,6 +63,174 @@ export const MainLayout: React.FC = () => {
 
       {/* Banner de Modo Mock si está activo */}
       <MockBanner />
+
+      {/* Mobile Drawer (Menú lateral completo para pantallas móviles) */}
+      {isMobileDrawerOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 100,
+            display: 'flex'
+          }}
+        >
+          {/* Backdrop con desenfoque */}
+          <div
+            onClick={() => setIsMobileDrawerOpen(false)}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(6px)'
+            }}
+          />
+
+          {/* Panel Lateral Deslizable */}
+          <div
+            style={{
+              position: 'relative',
+              width: '82%',
+              maxWidth: '320px',
+              height: '100%',
+              background: 'var(--bg-secondary)',
+              borderRight: '1px solid var(--border-subtle)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '1.25rem 1rem',
+              boxShadow: '10px 0 25px rgba(0, 0, 0, 0.6)',
+              zIndex: 101,
+              overflowY: 'auto'
+            }}
+          >
+            <div>
+              {/* Header del Drawer */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div
+                    style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <TrendingUp size={20} color="#ffffff" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1rem', fontWeight: 800 }}>Bet Analyzer</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--accent-cyan)', fontWeight: 700 }}>PRO QUANTITATIVE</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                  aria-label="Cerrar menú móvil"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Lista Completa de Enlaces Móviles */}
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1.25rem' }}>
+                {navigationItems.map(item => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMobileDrawerOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.85rem',
+                        padding: '0.75rem 0.9rem',
+                        borderRadius: 'var(--radius-md)',
+                        textDecoration: 'none',
+                        color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                        background: isActive ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
+                        border: isActive ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid transparent',
+                        fontWeight: isActive ? 700 : 500,
+                        fontSize: '0.92rem'
+                      }}
+                    >
+                      <span style={{ color: isActive ? 'var(--accent-cyan)' : 'inherit' }}>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Perfil en Drawer */}
+            <NavLink
+              to="/profile"
+              onClick={() => setIsMobileDrawerOpen(false)}
+              style={{
+                marginTop: '1.5rem',
+                padding: '0.85rem',
+                background: 'rgba(255, 255, 255, 0.04)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                textDecoration: 'none'
+              }}
+            >
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  color: '#fff'
+                }}
+              >
+                {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {user?.displayName || 'Usuario'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: user?.role === 'admin' ? '#fbbf24' : 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <ShieldCheck size={12} />
+                  <span>{user?.role === 'admin' ? 'Administrador' : 'Usuario Pro'}</span>
+                </div>
+              </div>
+            </NavLink>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Desktop Sidebar */}
@@ -137,46 +308,46 @@ export const MainLayout: React.FC = () => {
             </nav>
           </div>
 
-            <NavLink
-              to="/profile"
+          <NavLink
+            to="/profile"
+            style={{
+              padding: '0.85rem',
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <div
               style={{
-                padding: '0.85rem',
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-subtle)',
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                textDecoration: 'none',
-                cursor: 'pointer'
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                color: '#fff'
               }}
             >
-              <div
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  color: '#fff'
-                }}
-              >
-                {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+              {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.displayName || 'Usuario'}
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.displayName || 'Usuario'}
-                </div>
-                <div style={{ fontSize: '0.7rem', color: user?.role === 'admin' ? '#fbbf24' : 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <ShieldCheck size={12} />
-                  <span>{user?.role === 'admin' ? 'Administrador' : 'Usuario Pro'}</span>
-                </div>
+              <div style={{ fontSize: '0.7rem', color: user?.role === 'admin' ? '#fbbf24' : 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <ShieldCheck size={12} />
+                <span>{user?.role === 'admin' ? 'Administrador' : 'Usuario Pro'}</span>
               </div>
-            </NavLink>
+            </div>
+          </NavLink>
         </aside>
 
         {/* Main Body Area */}
@@ -191,13 +362,34 @@ export const MainLayout: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 1.5rem',
+              padding: '0 1.25rem',
               position: 'sticky',
               top: 0,
               zIndex: 40
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {/* Botón Menú Hamburguesa para Móvil */}
+              <button
+                type="button"
+                onClick={() => setIsMobileDrawerOpen(true)}
+                className="mobile-hamburger-btn"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.45rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+                aria-label="Abrir menú de navegación"
+              >
+                <Menu size={20} />
+              </button>
+
               <div className="mobile-only-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <TrendingUp size={20} color="var(--accent-cyan)" />
                 <span style={{ fontWeight: 800, fontSize: '1.05rem', fontFamily: 'var(--font-display)' }}>
@@ -206,7 +398,7 @@ export const MainLayout: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <NavLink
                 to="/notifications"
                 style={{
@@ -255,7 +447,7 @@ export const MainLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (PWA standard) */}
+      {/* Mobile Bottom Navigation Bar (PWA standard con acceso a TODO) */}
       <nav
         style={{
           position: 'fixed',
@@ -263,40 +455,134 @@ export const MainLayout: React.FC = () => {
           left: 0,
           right: 0,
           height: '62px',
-          background: 'rgba(9, 13, 22, 0.95)',
+          background: 'rgba(9, 13, 22, 0.96)',
           backdropFilter: 'blur(16px)',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-around',
-          zIndex: 50
+          zIndex: 50,
+          padding: '0 0.25rem'
         }}
         className="mobile-bottom-nav"
       >
-        {navigationItems.slice(0, 5).map(item => {
-          const isActive = location.pathname === item.path;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.2rem',
-                textDecoration: 'none',
-                color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
-                fontSize: '0.7rem',
-                fontWeight: isActive ? 700 : 500,
-                width: '20%'
-              }}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </NavLink>
-          );
-        })}
+        <NavLink
+          to="/"
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            textDecoration: 'none',
+            color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isActive ? 700 : 500,
+            flex: 1
+          })}
+        >
+          <TrendingUp size={18} />
+          <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink
+          to="/matches"
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            textDecoration: 'none',
+            color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isActive ? 700 : 500,
+            flex: 1
+          })}
+        >
+          <Flame size={18} />
+          <span>Partidos</span>
+        </NavLink>
+
+        <NavLink
+          to="/analysis"
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            textDecoration: 'none',
+            color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isActive ? 700 : 500,
+            flex: 1
+          })}
+        >
+          <Zap size={18} />
+          <span>Análisis</span>
+        </NavLink>
+
+        <NavLink
+          to="/parlays"
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            textDecoration: 'none',
+            color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isActive ? 700 : 500,
+            flex: 1
+          })}
+        >
+          <Layers size={18} />
+          <span>Parlays</span>
+        </NavLink>
+
+        <NavLink
+          to="/bookmakers"
+          style={({ isActive }) => ({
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            textDecoration: 'none',
+            color: isActive ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isActive ? 700 : 500,
+            flex: 1
+          })}
+        >
+          <SlidersHorizontal size={18} />
+          <span>Casas</span>
+        </NavLink>
+
+        {/* Botón Más... para abrir el drawer con Admin, Historial y Ajustes */}
+        <button
+          type="button"
+          onClick={() => setIsMobileDrawerOpen(true)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.2rem',
+            background: 'none',
+            border: 'none',
+            color: isMobileDrawerOpen ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            fontSize: '0.68rem',
+            fontWeight: isMobileDrawerOpen ? 700 : 500,
+            flex: 1,
+            cursor: 'pointer'
+          }}
+        >
+          <Menu size={18} />
+          <span>Más</span>
+        </button>
       </nav>
 
       <style>{`
@@ -308,6 +594,9 @@ export const MainLayout: React.FC = () => {
             display: none !important;
           }
           .mobile-only-logo {
+            display: none !important;
+          }
+          .mobile-hamburger-btn {
             display: none !important;
           }
         }

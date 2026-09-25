@@ -63,9 +63,11 @@ export class ApiClient {
     if (env.useMockData) {
       await this.mockDelay();
       const found = CLIENT_MOCK_MATCHES.find(m => m.id === matchId)
-        || (matchId.includes('col-1') || matchId.includes('millonarios') || matchId.includes('santa-fe') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-1') : null)
-        || (matchId.includes('col-2') || matchId.includes('nacional') || matchId.includes('junior') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-2') : null)
+        || (matchId.includes('col-2') || matchId.includes('nacional') || matchId.includes('millonarios') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-2') : null)
+        || (matchId.includes('col-1') || matchId.includes('junior') || matchId.includes('santa-fe') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-1') : null)
         || (matchId.includes('col-3') || matchId.includes('america') || matchId.includes('cali') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-3') : null)
+        || (matchId.includes('col-4') || matchId.includes('medellin') || matchId.includes('once') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-4') : null)
+        || (matchId.includes('col-5') || matchId.includes('tolima') || matchId.includes('bucaramanga') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-5') : null)
         || (matchId.includes('pd') || matchId.includes('madrid') || matchId.includes('barca') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-102') : null)
         || (matchId.includes('city') || matchId.includes('liverpool') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-103') : null)
         || CLIENT_MOCK_MATCHES[0]!;
@@ -239,36 +241,67 @@ export class ApiClient {
     requestedBookmakers?: string[]
   ): Promise<MatchOddsComparison> {
     if (env.useMockData || !env.apiBaseUrl) {
-      await this.mockDelay(200);
+      await this.mockDelay(180);
       const targetBks = requestedBookmakers && requestedBookmakers.length > 0
         ? requestedBookmakers
-        : ['pinnacle', 'bet365', 'betfair', '1xbet', 'betplay', 'wplay'];
+        : ['betplay', 'wplay', 'rushbet', 'codere_co', 'pinnacle', 'bet365'];
 
-      const makeRows = (basePrice: number): BookmakerComparisonRow[] => {
-        return targetBks.map(id => {
-          if (id === 'betplay' || id === 'wplay' || id === 'rushbet' || id === 'yajuego' || id === 'codere_co') {
-            return {
-              bookmakerId: id,
-              bookmakerName: id === 'betplay' ? 'BetPlay' : id === 'wplay' ? 'Wplay' : 'Rushbet',
-              isAvailable: false,
-              unavailableReason: 'Proveedor no disponible para esta casa',
-              price: undefined
-            };
+      // Encontrar información real del partido para no devolver siempre Arsenal vs Chelsea
+      const match = CLIENT_MOCK_MATCHES.find(m => m.id === eventId)
+        || (eventId.includes('col-2') || eventId.includes('nacional') || eventId.includes('millonarios') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-2') : null)
+        || (eventId.includes('col-3') || eventId.includes('america') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-3') : null)
+        || (eventId.includes('col-1') || eventId.includes('junior') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-col-1') : null)
+        || (eventId.includes('102') || eventId.includes('madrid') ? CLIENT_MOCK_MATCHES.find(m => m.id === 'match-102') : null)
+        || CLIENT_MOCK_MATCHES[0]!;
+
+      const existingOdds = CLIENT_MOCK_ODDS[eventId] || CLIENT_MOCK_ODDS[match.id];
+
+      const getBookmakerDisplayName = (id: string): string => {
+        switch (id.toLowerCase()) {
+          case 'betplay': return 'BetPlay (Coljuegos)';
+          case 'wplay': return 'Wplay.co (Coljuegos)';
+          case 'rushbet': return 'Rushbet (Coljuegos)';
+          case 'codere_co': return 'Codere Colombia';
+          case 'yajuego': return 'YaJuego (Coljuegos)';
+          case 'rivalo': return 'Rivalo Colombia';
+          case 'pinnacle': return 'Pinnacle (+EV Sharp)';
+          case 'bet365': return 'Bet365 (Global)';
+          case 'betfair': return 'Betfair (Exchange)';
+          case '1xbet': return '1xBet';
+          default: return id.toUpperCase();
+        }
+      };
+
+      const makeRows = (basePrice: number, marketKey: string, outcomeIndex: number = 0): BookmakerComparisonRow[] => {
+        return targetBks.map((id, idx) => {
+          // Intentar extraer cuota exacta si el mockOdds la tiene definida
+          let customPrice: number | undefined;
+          if (existingOdds && existingOdds.bookmakers) {
+            const bk = existingOdds.bookmakers.find(b => b.key.toLowerCase() === id.toLowerCase() || b.title.toLowerCase().includes(id.toLowerCase()));
+            if (bk && bk.markets) {
+              const mkt = bk.markets.find(m => (marketKey === '1X2' && (m.key === 'h2h' || (m.key as string) === '1X2')) || (marketKey.includes('over_under') && (m.key === 'totals' || (m.key as string) === 'over_under')));
+              if (mkt && mkt.outcomes && mkt.outcomes[outcomeIndex]) {
+                customPrice = mkt.outcomes[outcomeIndex]?.price;
+              }
+            }
           }
-          const delta = (Math.random() * 0.12 - 0.06);
-          const price = Number((basePrice + delta).toFixed(2));
+
+          // Variación realista por casa de apuestas si no viene en el mock
+          const variance = [0.03, -0.02, 0.05, -0.04, 0.02, -0.03][idx % 6]!;
+          const finalPrice = customPrice ?? Number(Math.max(1.05, basePrice + variance).toFixed(2));
+
           return {
             bookmakerId: id,
-            bookmakerName: id === 'pinnacle' ? 'Pinnacle' : id === 'bet365' ? 'Bet365' : id === 'betfair' ? 'Betfair' : '1xBet',
+            bookmakerName: getBookmakerDisplayName(id),
             isAvailable: true,
-            price,
+            price: finalPrice,
             lastUpdate: new Date().toISOString()
           };
         });
       };
 
-      const computeSel = (market: CanonicalMarket, selection: CanonicalSelection, basePrice: number, line?: number) => {
-        const rows = makeRows(basePrice);
+      const computeSel = (market: CanonicalMarket, selection: CanonicalSelection, basePrice: number, outcomeIdx: number = 0, line?: number) => {
+        const rows = makeRows(basePrice, market, outcomeIdx);
         const valid = rows.filter(r => r.isAvailable && typeof r.price === 'number');
         const prices = valid.map(r => r.price as number);
         const max = prices.length > 0 ? Math.max(...prices) : 0;
@@ -298,21 +331,21 @@ export class ApiClient {
 
       return {
         matchId: eventId,
-        sportKey,
-        homeTeam: 'Arsenal FC',
-        awayTeam: 'Chelsea FC',
-        commenceTime: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
+        sportKey: match.competition?.code || sportKey,
+        homeTeam: match.homeTeam.name,
+        awayTeam: match.awayTeam.name,
+        commenceTime: match.utcDate,
         fetchedAt: new Date().toISOString(),
         isStale: false,
         provider: 'MockOddsProvider',
         selections: {
-          '1X2_home': computeSel('1X2', 'home', 1.82),
-          '1X2_draw': computeSel('1X2', 'draw', 3.80),
-          '1X2_away': computeSel('1X2', 'away', 4.50),
-          'over_under_over_2.5': computeSel('over_under', 'over', 1.85, 2.5),
-          'over_under_under_2.5': computeSel('over_under', 'under', 1.95, 2.5),
-          'btts_yes': computeSel('btts', 'yes', 1.75),
-          'btts_no': computeSel('btts', 'no', 2.05)
+          '1X2_home': computeSel('1X2', 'home', eventId.includes('col-2') ? 2.05 : 1.82, 0),
+          '1X2_draw': computeSel('1X2', 'draw', eventId.includes('col-2') ? 3.35 : 3.80, 1),
+          '1X2_away': computeSel('1X2', 'away', eventId.includes('col-2') ? 3.75 : 4.50, 2),
+          'over_under_over_2.5': computeSel('over_under', 'over', 1.85, 0, 2.5),
+          'over_under_under_2.5': computeSel('over_under', 'under', 1.95, 1, 2.5),
+          'btts_yes': computeSel('btts', 'yes', 1.75, 0),
+          'btts_no': computeSel('btts', 'no', 2.05, 1)
         },
         activeBookmakersEvaluated: targetBks
       };
@@ -443,59 +476,59 @@ export class ApiClient {
           displayCategory: 'FOCO_DEL_DIA',
           selections: [
             {
-              matchId: 'match-col-1',
-              matchDescription: 'Millonarios vs Santa Fe',
+              matchId: 'match-col-2',
+              matchDescription: 'Atlético Nacional vs Millonarios FC',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
               utcDate: timeTodaySoon,
               market: '1X2',
               selection: 'home',
-              selectionName: 'Millonarios (Gana)',
-              probability: 0.58,
-              odds: 1.85,
+              selectionName: 'Atlético Nacional (Gana)',
+              probability: 0.55,
+              odds: 2.05,
               bookmaker: 'BetPlay',
               bookmakerId: 'betplay',
-              edge: 0.04,
-              expectedValue: 7.3,
+              edge: 0.048,
+              expectedValue: 8.2,
               dataQuality: 'HIGH'
             },
             {
-              matchId: 'match-col-2',
-              matchDescription: 'Atlético Nacional vs Junior',
+              matchId: 'match-col-3',
+              matchDescription: 'América de Cali vs Deportivo Cali',
               competitionId: 'CO_LFP',
               competitionName: 'Liga BetPlay',
               utcDate: timeTodayEvening,
               market: '1X2',
               selection: 'home',
-              selectionName: 'Atlético Nacional (Gana)',
-              probability: 0.55,
+              selectionName: 'América de Cali (Gana)',
+              probability: 0.53,
               odds: 1.95,
-              bookmaker: 'BetPlay',
-              bookmakerId: 'betplay',
-              edge: 0.035,
-              expectedValue: 7.25,
-              dataQuality: 'MEDIUM'
+              bookmaker: 'Wplay',
+              bookmakerId: 'wplay',
+              edge: 0.038,
+              expectedValue: 7.15,
+              dataQuality: 'HIGH'
             }
           ],
-          combinedOdds: 3.608,
-          estimatedProbability: 0.319,
-          estimatedEV: 15.1,
-          dataQuality: 'MEDIUM',
+          combinedOdds: 3.997,
+          estimatedProbability: 0.291,
+          estimatedEV: 16.3,
+          dataQuality: 'HIGH',
           modelVersion: 'v1.0.0',
           generatedAt: new Date().toISOString(),
           status: 'ACTIVE',
           correlationRisk: 'NONE',
           correlationNotes: [],
-          rankingScore: 42.5,
+          rankingScore: 45.5,
           explanation: {
-            summary: 'Foco del Día (Liga BetPlay): Combinada de dos victorias locales respaldadas por consistencia en casa.',
-            justification: 'Millonarios y Nacional presentan ventajas marcadas de xG y forma reciente en sus respectivos clásicos.',
+            summary: 'Foco del Día (Liga BetPlay): Superclásico Atlético Nacional vs Millonarios FC respaldado por ventaja en Atanasio Girardot.',
+            justification: 'Nacional y América presentan ventajas marcadas de xG (1.84 vs 1.05) y consistencia en sus respectivos clásicos ante Millonarios y Deportivo Cali.',
             keyFactors: [
-              'Millonarios invicto en los últimos 6 clásicos capitalinos',
-              'Nacional supera a Junior en remates a puerta por partido (5.4 vs 3.2)'
+              'Atlético Nacional con 5.8 tiros a puerta por partido como local en Medellín',
+              'Cuota 2.05 en BetPlay con valor esperado (+EV) positivo de 8.2%'
             ],
             riskFactors: [
-              'Rotación de plantilla por calendario apretado en liga local'
+              'Intensidad y fricción táctica propia de un superclásico con marcador ajustado'
             ],
             provider: 'mock',
             generatedAt: new Date().toISOString()

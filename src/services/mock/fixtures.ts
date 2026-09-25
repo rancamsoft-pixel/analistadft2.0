@@ -257,71 +257,11 @@ export const CLIENT_MOCK_MATCHES: SportMatchDetails[] = [
     }
   },
 
-  // ─── Partidos Colombianos ─────────────────────────────────────────────────
-  {
-    id: 'match-col-1',
-    competition: COLOMBIA_COMPETITIONS[0]!,
-    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 3).toISOString(),
-    status: 'SCHEDULED',
-    homeTeam: {
-      id: 'millonarios',
-      name: 'Millonarios FC',
-      shortName: 'Millonarios',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Millonarios_F.C._escudo.svg/100px-Millonarios_F.C._escudo.svg.png',
-      form: ['W', 'W', 'D', 'W', 'W']
-    },
-    awayTeam: {
-      id: 'santa-fe',
-      name: 'Independiente Santa Fe',
-      shortName: 'Santa Fe',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Independiente_Santa_Fe_logo.svg/100px-Independiente_Santa_Fe_logo.svg.png',
-      form: ['D', 'W', 'L', 'W', 'D']
-    },
-    score: { home: null, away: null },
-    venue: 'Estadio El Campín (Bogotá)',
-    isMock: true,
-    statistics: {
-      possession: { home: 55, away: 45 },
-      shotsOnTarget: { home: 5, away: 3 },
-      totalShots: { home: 13, away: 9 },
-      corners: { home: 6, away: 4 },
-      fouls: { home: 11, away: 14 },
-      xg: { home: 1.72, away: 0.95 }
-    },
-    headToHead: {
-      totalMatches: 14,
-      homeWins: 7,
-      awayWins: 4,
-      draws: 3,
-      recentMatches: [
-        { date: '2025-03-12', homeTeam: 'Millonarios FC', awayTeam: 'Independiente Santa Fe', score: '2 - 1' },
-        { date: '2024-09-22', homeTeam: 'Independiente Santa Fe', awayTeam: 'Millonarios FC', score: '0 - 0' },
-        { date: '2024-04-14', homeTeam: 'Millonarios FC', awayTeam: 'Independiente Santa Fe', score: '1 - 0' }
-      ]
-    },
-    injuries: {
-      home: [
-        { player: 'Larry Vásquez', position: 'Defensa', status: 'Baja confirmada', reason: 'Lesión muscular' }
-      ],
-      away: [
-        { player: 'Jersson González', position: 'Mediocampo', status: 'Duda', reason: 'Molestias en rodilla' }
-      ]
-    },
-    news: [
-      { title: 'Clásico capitalino: Millonarios busca seguir líder del grupo A', source: 'El Colombiano', publishedAt: 'Hoy 08:00' },
-      { title: 'Santa Fe recupera a dos titulares para el clásico', source: 'El Espectador', publishedAt: 'Hoy 10:30' }
-    ],
-    oddsMovement: {
-      openingOdds: { home: 2.10, draw: 3.40, away: 3.20 },
-      currentOdds: { home: 1.88, draw: 3.50, away: 3.55 },
-      trend: 'DOWN',
-      movementPercentage: -10.5
-    }
-  },
+  // ─── Partidos Colombianos (Liga BetPlay Dimayor) ──────────────────────────
   {
     id: 'match-col-2',
     competition: COLOMBIA_COMPETITIONS[0]!,
-    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 6).toISOString(),
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 3.5).toISOString(), // Hoy (+3.5h)
     status: 'SCHEDULED',
     homeTeam: {
       id: 'nacional',
@@ -331,51 +271,112 @@ export const CLIENT_MOCK_MATCHES: SportMatchDetails[] = [
       form: ['W', 'W', 'W', 'D', 'W']
     },
     awayTeam: {
+      id: 'millonarios',
+      name: 'Millonarios FC',
+      shortName: 'Millonarios',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Millonarios_F.C._escudo.svg/100px-Millonarios_F.C._escudo.svg.png',
+      form: ['W', 'D', 'W', 'W', 'D']
+    },
+    score: { home: null, away: null },
+    venue: 'Estadio Atanasio Girardot (Medellín)',
+    isMock: true,
+    statistics: {
+      possession: { home: 56, away: 44 },
+      shotsOnTarget: { home: 6, away: 4 },
+      totalShots: { home: 15, away: 10 },
+      corners: { home: 7, away: 4 },
+      fouls: { home: 11, away: 13 },
+      xg: { home: 1.84, away: 1.05 }
+    },
+    headToHead: {
+      totalMatches: 24,
+      homeWins: 11,
+      awayWins: 7,
+      draws: 6,
+      recentMatches: [
+        { date: '2025-03-02', homeTeam: 'Atlético Nacional', awayTeam: 'Millonarios FC', score: '2 - 1' },
+        { date: '2024-11-20', homeTeam: 'Millonarios FC', awayTeam: 'Atlético Nacional', score: '1 - 1' },
+        { date: '2024-07-28', homeTeam: 'Millonarios FC', awayTeam: 'Atlético Nacional', score: '2 - 1' },
+        { date: '2024-02-11', homeTeam: 'Atlético Nacional', awayTeam: 'Millonarios FC', score: '0 - 1' }
+      ]
+    },
+    injuries: {
+      home: [
+        { player: 'David Ospina', position: 'Portero', status: 'Disponible', reason: '' },
+        { player: 'Edwin Cardona', position: 'Mediocampo', status: 'Disponible', reason: '' }
+      ],
+      away: [
+        { player: 'Radamel Falcao García', position: 'Delantero', status: 'Disponible', reason: '' },
+        { player: 'Mackalister Silva', position: 'Mediocampo', status: 'Duda', reason: 'Sobrecarga muscular' }
+      ]
+    },
+    news: [
+      { title: 'Superclásico Colombiano: Atlético Nacional recibe a Millonarios en un Atanasio abarrotado', source: 'Win Sports', publishedAt: 'Hoy 11:30' },
+      { title: 'Duelo táctico entre verdes y embajadores por la cima de la Liga BetPlay', source: 'El Colombiano', publishedAt: 'Hoy 14:00' }
+    ],
+    oddsMovement: {
+      openingOdds: { home: 2.15, draw: 3.25, away: 3.40 },
+      currentOdds: { home: 1.95, draw: 3.35, away: 3.75 },
+      trend: 'DOWN',
+      movementPercentage: -9.3
+    }
+  },
+  {
+    id: 'match-col-1',
+    competition: COLOMBIA_COMPETITIONS[0]!,
+    utcDate: new Date(Date.now() + 1000 * 60 * 60 * 26).toISOString(), // Mañana (+26h)
+    status: 'SCHEDULED',
+    homeTeam: {
       id: 'junior',
       name: 'Junior FC',
       shortName: 'Junior',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Atletico_Junior_crest.svg/100px-Atletico_Junior_crest.svg.png',
       form: ['W', 'L', 'W', 'W', 'D']
     },
+    awayTeam: {
+      id: 'santa-fe',
+      name: 'Independiente Santa Fe',
+      shortName: 'Santa Fe',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Independiente_Santa_Fe_logo.svg/100px-Independiente_Santa_Fe_logo.svg.png',
+      form: ['D', 'W', 'L', 'W', 'D']
+    },
     score: { home: null, away: null },
-    venue: 'Estadio Atanasio Girardot (Medellín)',
+    venue: 'Estadio Metropolitano Roberto Meléndez (Barranquilla)',
     isMock: true,
     statistics: {
-      possession: { home: 58, away: 42 },
-      shotsOnTarget: { home: 6, away: 3 },
-      totalShots: { home: 16, away: 8 },
-      corners: { home: 7, away: 3 },
-      fouls: { home: 9, away: 15 },
-      xg: { home: 1.95, away: 0.78 }
+      possession: { home: 57, away: 43 },
+      shotsOnTarget: { home: 5, away: 3 },
+      totalShots: { home: 14, away: 8 },
+      corners: { home: 6, away: 3 },
+      fouls: { home: 10, away: 14 },
+      xg: { home: 1.62, away: 0.88 }
     },
     headToHead: {
       totalMatches: 16,
-      homeWins: 10,
-      awayWins: 3,
-      draws: 3,
+      homeWins: 8,
+      awayWins: 4,
+      draws: 4,
       recentMatches: [
-        { date: '2025-02-20', homeTeam: 'Atlético Nacional', awayTeam: 'Junior FC', score: '3 - 1' },
-        { date: '2024-08-18', homeTeam: 'Junior FC', awayTeam: 'Atlético Nacional', score: '1 - 2' },
-        { date: '2024-03-10', homeTeam: 'Atlético Nacional', awayTeam: 'Junior FC', score: '2 - 0' }
+        { date: '2024-09-01', homeTeam: 'Junior FC', awayTeam: 'Independiente Santa Fe', score: '1 - 1' },
+        { date: '2024-03-24', homeTeam: 'Independiente Santa Fe', awayTeam: 'Junior FC', score: '2 - 0' }
       ]
     },
     injuries: {
       home: [
-        { player: 'Dorlan Pabón', position: 'Delantera', status: 'Disponible', reason: '' }
+        { player: 'Carlos Bacca', position: 'Delantera', status: 'Disponible', reason: '' }
       ],
       away: [
-        { player: 'Fredy Hinestroza', position: 'Delantera', status: 'Duda', reason: 'Cuadro gripal' }
+        { player: 'Hugo Rodallega', position: 'Delantera', status: 'Disponible', reason: '' }
       ]
     },
     news: [
-      { title: 'Nacional llega invicto al duelo ante Junior buscando el primer lugar', source: 'Win Sports', publishedAt: 'Hoy 09:15' },
-      { title: 'Junior viaja a Medellín con plantilla completa tras entrenamiento intenso', source: 'El Heraldo', publishedAt: 'Hoy 11:00' }
+      { title: 'Junior busca hacer respetar el calor del Metropolitano ante Santa Fe', source: 'El Heraldo', publishedAt: 'Ayer' }
     ],
     oddsMovement: {
-      openingOdds: { home: 1.80, draw: 3.60, away: 4.00 },
-      currentOdds: { home: 1.72, draw: 3.70, away: 4.40 },
+      openingOdds: { home: 2.05, draw: 3.20, away: 3.60 },
+      currentOdds: { home: 1.90, draw: 3.30, away: 3.80 },
       trend: 'DOWN',
-      movementPercentage: -4.4
+      movementPercentage: -7.3
     }
   },
   {
@@ -759,10 +760,273 @@ export const CLIENT_MOCK_ODDS: Record<string, EventOdds> = {
         ]
       }
     ]
+  },
+  'match-col-2': {
+    id: 'match-col-2',
+    sportKey: 'soccer_colombia_primera_a',
+    sportTitle: 'Liga BetPlay Dimayor',
+    commenceTime: new Date(Date.now() + 1000 * 60 * 60 * 3.5).toISOString(),
+    homeTeam: 'Atlético Nacional',
+    awayTeam: 'Millonarios FC',
+    isMock: true,
+    bestOdds: {
+      home: { price: 2.05, bookmaker: 'BetPlay' },
+      draw: { price: 3.45, bookmaker: 'Wplay' },
+      away: { price: 3.85, bookmaker: 'Rushbet' },
+      payoutMargin: 96.2
+    },
+    bookmakers: [
+      {
+        key: 'betplay',
+        title: 'BetPlay',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Atlético Nacional', price: 2.05 },
+              { name: 'Empate', price: 3.35 },
+              { name: 'Millonarios FC', price: 3.75 }
+            ]
+          },
+          {
+            key: 'totals',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Over', price: 1.92, point: 2.5 },
+              { name: 'Under', price: 1.88, point: 2.5 }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'wplay',
+        title: 'Wplay',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Atlético Nacional', price: 2.00 },
+              { name: 'Empate', price: 3.45 },
+              { name: 'Millonarios FC', price: 3.70 }
+            ]
+          },
+          {
+            key: 'totals',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Over', price: 1.90, point: 2.5 },
+              { name: 'Under', price: 1.90, point: 2.5 }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'rushbet',
+        title: 'Rushbet',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Atlético Nacional', price: 1.98 },
+              { name: 'Empate', price: 3.40 },
+              { name: 'Millonarios FC', price: 3.85 }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'codere_co',
+        title: 'Codere Colombia',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Atlético Nacional', price: 2.02 },
+              { name: 'Empate', price: 3.30 },
+              { name: 'Millonarios FC', price: 3.65 }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'pinnacle',
+        title: 'Pinnacle',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Atlético Nacional', price: 2.05 },
+              { name: 'Empate', price: 3.40 },
+              { name: 'Millonarios FC', price: 3.80 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  'match-col-3': {
+    id: 'match-col-3',
+    sportKey: 'soccer_colombia_primera_a',
+    sportTitle: 'Liga BetPlay Dimayor',
+    commenceTime: new Date(Date.now() + 1000 * 60 * 60 * 8).toISOString(),
+    homeTeam: 'América de Cali',
+    awayTeam: 'Deportivo Cali',
+    isMock: true,
+    bestOdds: {
+      home: { price: 1.98, bookmaker: 'BetPlay' },
+      draw: { price: 3.45, bookmaker: 'Wplay' },
+      away: { price: 3.90, bookmaker: 'Rushbet' },
+      payoutMargin: 95.8
+    },
+    bookmakers: [
+      {
+        key: 'betplay',
+        title: 'BetPlay',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'América de Cali', price: 1.98 },
+              { name: 'Empate', price: 3.40 },
+              { name: 'Deportivo Cali', price: 3.80 }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'wplay',
+        title: 'Wplay',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'América de Cali', price: 1.95 },
+              { name: 'Empate', price: 3.45 },
+              { name: 'Deportivo Cali', price: 3.75 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  'match-col-1': {
+    id: 'match-col-1',
+    sportKey: 'soccer_colombia_primera_a',
+    sportTitle: 'Liga BetPlay Dimayor',
+    commenceTime: new Date(Date.now() + 1000 * 60 * 60 * 26).toISOString(),
+    homeTeam: 'Junior FC',
+    awayTeam: 'Independiente Santa Fe',
+    isMock: true,
+    bestOdds: {
+      home: { price: 1.92, bookmaker: 'BetPlay' },
+      draw: { price: 3.35, bookmaker: 'Wplay' },
+      away: { price: 4.10, bookmaker: 'Rushbet' },
+      payoutMargin: 95.5
+    },
+    bookmakers: [
+      {
+        key: 'betplay',
+        title: 'BetPlay',
+        lastUpdate: new Date().toISOString(),
+        markets: [
+          {
+            key: 'h2h',
+            lastUpdate: new Date().toISOString(),
+            outcomes: [
+              { name: 'Junior FC', price: 1.92 },
+              { name: 'Empate', price: 3.30 },
+              { name: 'Independiente Santa Fe', price: 4.00 }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
 
 export const CLIENT_MOCK_ANALYSIS: Record<string, MatchAnalysisResult> = {
+  'match-col-2': {
+    matchId: 'match-col-2',
+    summary: 'Superclásico Colombiano: Modelo cuantitativo proyecta una marcada ventaja posicional y de xG (1.84 vs 1.05) para Atlético Nacional en el Atanasio Girardot frente a Millonarios FC. La localía y la presión en campo rival otorgan un valor positivo en las cuotas de BetPlay y Wplay.',
+    keyTacticalInsights: [
+      'Atlético Nacional promedia 5.8 tiros a puerta por partido como local en la Liga BetPlay.',
+      'Millonarios reduce su tasa de xG a 0.92 cuando juega en la altura de Medellín o ante los punteros.',
+      'El modelo Poisson de regresión bivariada proyecta un 54.5% de probabilidad de triunfo verdolaga con un Edge de +4.8% en BetPlay a cuota 2.05.'
+    ],
+    projectedScore: { home: 2, away: 1 },
+    winProbabilities: { home: 54.5, draw: 26.5, away: 19.0 },
+    valueBets: [
+      {
+        selection: 'Atlético Nacional (Gana)',
+        market: '1X2 Match Winner',
+        currentOdds: 2.05,
+        estimatedProbability: 0.545,
+        impliedProbability: 0.488,
+        expectedValuePercentage: 6.85,
+        isValueBet: true,
+        confidenceScore: 82,
+        recommendation: 'STRONG_VALUE'
+      },
+      {
+        selection: 'Ambos Equipos Anotan (Sí)',
+        market: 'BTTS',
+        currentOdds: 1.88,
+        estimatedProbability: 0.57,
+        impliedProbability: 0.53,
+        expectedValuePercentage: 5.24,
+        isValueBet: true,
+        confidenceScore: 75,
+        recommendation: 'STRONG_VALUE'
+      }
+    ],
+    riskFactor: 'MEDIUM',
+    disclaimer: 'Análisis predictivo de valor basado en xG, Poisson y cuotas reguladas de Coljuegos.',
+    provider: 'MockAIProvider',
+    isMock: true,
+    generatedAt: new Date().toISOString()
+  },
+  'match-col-3': {
+    matchId: 'match-col-3',
+    summary: 'Clásico Vallecaucano: América de Cali llega con un diferencial de goles esperado superior y mayor volumen ofensivo en el Pascual Guerrero ante un Deportivo Cali con inconsistencias defensivas.',
+    keyTacticalInsights: [
+      'América invicto en los últimos 4 clásicos disputados en el Pascual Guerrero.',
+      'Deportivo Cali ha recibido al menos un gol en el 85% de sus salidas recientes.'
+    ],
+    projectedScore: { home: 2, away: 0 },
+    winProbabilities: { home: 53.0, draw: 27.0, away: 20.0 },
+    valueBets: [
+      {
+        selection: 'América de Cali (Gana)',
+        market: '1X2 Match Winner',
+        currentOdds: 1.98,
+        estimatedProbability: 0.53,
+        impliedProbability: 0.505,
+        expectedValuePercentage: 4.94,
+        isValueBet: true,
+        confidenceScore: 78,
+        recommendation: 'STRONG_VALUE'
+      }
+    ],
+    riskFactor: 'MEDIUM',
+    disclaimer: 'Análisis cuantitativo de valor para la Liga BetPlay.',
+    provider: 'MockAIProvider',
+    isMock: true,
+    generatedAt: new Date().toISOString()
+  },
   'match-101': {
     matchId: 'match-101',
     summary: 'Modelo predictivo cuantitativo detecta un desequilibrio de valor en el mercado 1X2 para Arsenal vs Chelsea. Los datos de xG y presión alta en el Emirates señalan una superioridad posicional de 63% para los locales.',
@@ -798,7 +1062,7 @@ export const CLIENT_MOCK_ANALYSIS: Record<string, MatchAnalysisResult> = {
       }
     ],
     riskFactor: 'MEDIUM',
-    disclaimer: 'Datos mockeados en modo desarrollo. El análisis no constituye asesoría financiera.',
+    disclaimer: 'Datos basados en modelos Poisson y xG. El análisis no constituye asesoría financiera.',
     provider: 'MockAIProvider',
     isMock: true,
     generatedAt: new Date().toISOString()

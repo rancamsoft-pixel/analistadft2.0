@@ -73,7 +73,46 @@ export function isMultiDateParlay(parlay: SavedParlay): boolean {
 }
 
 /**
- * Comprueba si un parlay coincide con el filtro de fecha seleccionado
+ * Comprueba si una fecha UTC individual coincide con el filtro de fecha
+ */
+export function matchesMatchDateFilter(utcDate: string, filter: DateFilterOption): boolean {
+  if (!filter || filter === 'ALL') return true;
+
+  const matchDate = new Date(utcDate);
+  if (isNaN(matchDate.getTime())) return true;
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0]!;
+  
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0]!;
+
+  const matchDateStr = matchDate.toISOString().split('T')[0]!;
+
+  if (filter === 'TODAY') {
+    return matchDateStr === todayStr;
+  }
+
+  if (filter === 'TOMORROW') {
+    return matchDateStr === tomorrowStr;
+  }
+
+  if (filter === 'WEEKEND') {
+    const day = matchDate.getDay(); // 0 Dom, 5 Vie, 6 Sab
+    return day === 5 || day === 6 || day === 0;
+  }
+
+  if (filter === 'PACIENCIA_MULTI') {
+    return true;
+  }
+
+  // Fecha exacta YYYY-MM-DD
+  return matchDateStr === filter;
+}
+
+/**
+ * Comprueba si un parlay coincide con el filtro de fecha seleccionado de manera estricta
  */
 export function matchesDateFilter(parlay: SavedParlay, filter: DateFilterOption): boolean {
   if (!filter || filter === 'ALL') return true;
@@ -85,27 +124,37 @@ export function matchesDateFilter(parlay: SavedParlay, filter: DateFilterOption)
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0]!;
 
+  const isMulti = isMultiDateParlay(parlay);
+
+  if (filter === 'PACIENCIA_MULTI') {
+    return parlay.type === 'PACIENCIA_PARLAY' || parlay.displayCategory === 'PACIENCIA' || isMulti;
+  }
+
+  // Si el usuario pide un día específico (Hoy, Mañana o fecha exacta), no debe mezclar parleys multi-fecha a menos que todas sus selecciones sean de esa fecha
   if (filter === 'TODAY') {
-    // Si la fecha del parlay es hoy o alguna selección es hoy
-    return parlay.date === todayStr || parlay.selections.some(s => s.utcDate.startsWith(todayStr));
+    if (isMulti) return false;
+    return parlay.selections.length > 0
+      ? parlay.selections.every(s => s.utcDate.startsWith(todayStr))
+      : parlay.date === todayStr;
   }
 
   if (filter === 'TOMORROW') {
-    return parlay.date === tomorrowStr || parlay.selections.some(s => s.utcDate.startsWith(tomorrowStr));
+    if (isMulti) return false;
+    return parlay.selections.length > 0
+      ? parlay.selections.every(s => s.utcDate.startsWith(tomorrowStr))
+      : parlay.date === tomorrowStr;
   }
 
   if (filter === 'WEEKEND') {
-    // Viernes, Sábado o Domingo
-    return parlay.selections.some(s => {
+    return parlay.selections.every(s => {
       const day = new Date(s.utcDate).getDay(); // 0 Dom, 5 Vie, 6 Sab
       return day === 5 || day === 6 || day === 0;
     });
   }
 
-  if (filter === 'PACIENCIA_MULTI') {
-    return parlay.type === 'PACIENCIA_PARLAY' || parlay.displayCategory === 'PACIENCIA' || isMultiDateParlay(parlay);
-  }
-
   // Fecha exacta YYYY-MM-DD
-  return parlay.date === filter || parlay.selections.some(s => s.utcDate.startsWith(filter));
+  if (isMulti) return false;
+  return parlay.selections.length > 0
+    ? parlay.selections.every(s => s.utcDate.startsWith(filter))
+    : parlay.date === filter;
 }

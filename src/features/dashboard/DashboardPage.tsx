@@ -16,7 +16,8 @@ import {
   Info,
   CheckCircle2,
   CalendarDays,
-  Filter
+  Filter,
+  Flame
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -30,14 +31,19 @@ import {
   isParlayAvailable,
   getTimeUntilFirstMatch,
   matchesDateFilter,
+  matchesMatchDateFilter,
   DateFilterOption
 } from '../../utils/parlayAvailability';
+import { SportMatch, UserPreferences } from '../../types/domain';
+import { UserSettingsService } from '../../services/userSettings.service';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [parlays, setParlays] = useState<SavedParlay[]>([]);
+  const [dailyMatches, setDailyMatches] = useState<SportMatch[]>([]);
+  const [userPrefs, setUserPrefs] = useState<UserPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>('Hoy 07:00');
@@ -49,35 +55,59 @@ export const DashboardPage: React.FC = () => {
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(true);
   const [regionFilter, setRegionFilter] = useState<'ALL' | 'COLOMBIA' | 'EUROPA'>('ALL');
 
-  const loadDailyParlays = async () => {
+  const loadDashboardData = async () => {
     if (!user) return;
     setLoading(true);
     try {
-      const data = await ApiClient.getUserParlays(user.id, customDate || undefined);
-      setParlays(data || []);
-      if (data && data.length > 0 && data[0]?.generatedAt) {
-        const genDate = new Date(data[0].generatedAt);
+      const activeDate = customDate
+        ? customDate
+        : dateFilter === 'TODAY'
+        ? new Date().toISOString().split('T')[0]
+        : dateFilter === 'TOMORROW'
+        ? new Date(Date.now() + 86400000).toISOString().split('T')[0]
+        : undefined;
+
+      const [parlayData, matchesList, prefs] = await Promise.all([
+        ApiClient.getUserParlays(user.id, activeDate),
+        ApiClient.getMatches('all'),
+        UserSettingsService.getUserPreferences(user.id).catch(() => null)
+      ]);
+
+      setParlays(parlayData || []);
+      setDailyMatches(matchesList || []);
+      if (prefs) setUserPrefs(prefs);
+
+      if (parlayData && parlayData.length > 0 && parlayData[0]?.generatedAt) {
+        const genDate = new Date(parlayData[0].generatedAt);
         setLastUpdated(
           genDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
         );
       }
     } catch (err) {
-      console.error('Error cargando parlays diarios:', err);
+      console.error('Error cargando datos del dashboard:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDailyParlays();
-  }, [user]);
+    loadDashboardData();
+  }, [user, dateFilter, customDate]);
 
   const handleGenerateNow = async () => {
     if (!user) return;
     setGenerating(true);
     try {
-      const fresh = await ApiClient.generateUserParlays(user.id, customDate || undefined);
+      const activeDate = customDate
+        ? customDate
+        : dateFilter === 'TODAY'
+        ? new Date().toISOString().split('T')[0]
+        : undefined;
+
+      const fresh = await ApiClient.generateUserParlays(user.id, activeDate);
+      const freshMatches = await ApiClient.getMatches('all');
       setParlays(fresh);
+      setDailyMatches(freshMatches);
       const nowTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       setLastUpdated(`Hoy ${nowTime}`);
       setFeedbackMsg('¡Análisis, cuotas y combinadas actualizadas con éxito!');
@@ -102,14 +132,14 @@ export const DashboardPage: React.FC = () => {
   const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
   const userName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'Analista';
 
-  // Aplicar filtros de Fecha, Disponibilidad y Región
+  // Aplicar filtros de Fecha, Disponibilidad y Región a combinadas
   const filteredParlays = parlays.filter(p => {
     // 1. Filtro: solo parleys que aún se pueden hacer (partidos no iniciados)
     if (onlyAvailable && !isParlayAvailable(p)) {
       return false;
     }
 
-    // 2. Filtro de fecha
+    // 2. Filtro de fecha estricto
     const activeDate = customDate ? customDate : dateFilter;
     if (!matchesDateFilter(p, activeDate)) {
       return false;
@@ -122,6 +152,24 @@ export const DashboardPage: React.FC = () => {
         s.competitionName?.toUpperCase().includes('BETPLAY') ||
         s.competitionName?.toUpperCase().includes('COLOMBIA')
       );
+      if (regionFilter === 'COLOMBIA' && !isCol) return false;
+      if (regionFilter === 'EUROPA' && isCol) return false;
+    }
+
+    return true;
+  });
+
+  // Aplicar filtros de Fecha, Disponibilidad y Región a emparejamientos individuales
+  const activeDate = customDate ? customDate : dateFilter;
+  const filteredMatches = dailyMatches.filter(m => {
+    if (onlyAvailable && m.status === 'FINISHED') return false;
+
+    if (!matchesMatchDateFilter(m.utcDate, activeDate)) {
+      return false;
+    }
+
+    if (regionFilter !== 'ALL') {
+      const isCol = m.competition.region === 'COLOMBIA' || m.competition.country.toLowerCase().includes('colombia');
       if (regionFilter === 'COLOMBIA' && !isCol) return false;
       if (regionFilter === 'EUROPA' && isCol) return false;
     }
@@ -936,7 +984,152 @@ export const DashboardPage: React.FC = () => {
         </section>
       )}
 
-      {/* 6. OTRAS OPORTUNIDADES */}
+      {/* 6. EMPAREJAMIENTOS DEL DÍA & ANÁLISIS RÁPIDO (Filtrados por la fecha seleccionada) */}
+      {!loading && (
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '7px',
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #10b981 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff'
+                }}
+              >
+                <Flame size={16} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>
+                EMPAREJAMIENTOS Y ANÁLISIS DE LA FECHA
+              </h3>
+            </div>
+
+            <Badge variant="info">
+              {filteredMatches.length} partido(s) programados
+            </Badge>
+          </div>
+
+          {filteredMatches.length === 0 ? (
+            <Card style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <span>No hay partidos programados para el criterio y fecha seleccionados. Prueba cambiando la fecha en el filtro superior.</span>
+            </Card>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+              {filteredMatches.map(m => {
+                const isLive = m.status === 'LIVE';
+                const matchTime = new Date(m.utcDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                const matchDay = new Date(m.utcDate).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+                return (
+                  <Card
+                    key={m.id}
+                    glow={m.id.includes('col-2') || isLive ? 'cyan' : 'none'}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                      padding: '1.15rem'
+                    }}
+                  >
+                    {/* Header Partido */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        {m.competition.emblem && (
+                          <img src={m.competition.emblem} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                        )}
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          {m.competition.name}
+                        </span>
+                      </div>
+
+                      {isLive ? (
+                        <Badge variant="live">
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', marginRight: '4px', display: 'inline-block' }} />
+                          EN VIVO {m.minute ? `${m.minute}'` : ''}
+                        </Badge>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.74rem', color: 'var(--accent-cyan)' }}>
+                          <Clock size={12} />
+                          <span>{matchDay}, {matchTime}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Equipos y Marcador */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', margin: '0.25rem 0' }}>
+                      {/* Local */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flex: 1 }}>
+                        <img
+                          src={m.homeTeam.logo}
+                          alt={m.homeTeam.name}
+                          style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{m.homeTeam.shortName || m.homeTeam.name}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Local</div>
+                        </div>
+                      </div>
+
+                      {/* VS o Score */}
+                      <div style={{ padding: '0.3rem 0.6rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', fontWeight: 800, fontSize: '0.88rem' }}>
+                        {isLive && m.score?.home !== null
+                          ? `${m.score.home} - ${m.score.away}`
+                          : 'VS'}
+                      </div>
+
+                      {/* Visitante */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.65rem', flex: 1, textAlign: 'right' }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{m.awayTeam.shortName || m.awayTeam.name}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Visitante</div>
+                        </div>
+                        <img
+                          src={m.awayTeam.logo}
+                          alt={m.awayTeam.name}
+                          style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Cuotas de Casas Configuradas (BetPlay, Wplay, etc.) */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.25)', padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        Casa preferida: <strong style={{ color: '#38bdf8' }}>{userPrefs?.activeBookmakerIds?.[0] ? userPrefs.activeBookmakerIds[0].toUpperCase() : (m.competition.country === 'Colombia' ? 'BETPLAY' : 'PINNACLE')}</strong>
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.6rem', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                        <span style={{ color: 'var(--accent-cyan)' }}>1: {m.id.includes('col-2') ? '2.05' : '1.85'}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>X: {m.id.includes('col-2') ? '3.35' : '3.40'}</span>
+                        <span style={{ color: 'var(--accent-purple)' }}>2: {m.id.includes('col-2') ? '3.75' : '4.10'}</span>
+                      </div>
+                    </div>
+
+                    {/* Botón Acción */}
+                    <div style={{ width: '100%' }}>
+                      <Button
+                        size="sm"
+                        variant={m.id.includes('col-2') ? 'accent' : 'secondary'}
+                        rightIcon={<ChevronRight size={14} />}
+                        onClick={() => navigate(`/matches/${m.id}`)}
+                      >
+                        Ver Análisis Cuantitativo (+EV)
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 7. OTRAS OPORTUNIDADES */}
       {!loading && alternativas.length > 0 && (
         <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
